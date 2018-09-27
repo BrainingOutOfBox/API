@@ -1,4 +1,4 @@
-name := """play-java-starter-example"""
+name := """methode-635-api"""
 
 version := "1.0-SNAPSHOT"
 
@@ -19,3 +19,7 @@ libraryDependencies += "org.awaitility" % "awaitility" % "2.0.0" % Test
 
 // Make verbose tests
 testOptions in Test := Seq(Tests.Argument(TestFrameworks.JUnit, "-a", "-v"))
+
+// Swagger Documentation
+libraryDependencies += "io.swagger" %% "swagger-play2" % "1.6.0"
+

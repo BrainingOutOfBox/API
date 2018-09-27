@@ -4,10 +4,11 @@
 
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.index
-# An example controller showing how to use dependency injection
-GET     /count                      controllers.CountController.count
-# An example controller showing how to write asynchronous code
-GET     /message                    controllers.AsyncController.message
+
+# swagger routes
+GET     /swagger.json               controllers.ApiHelpController.getResources
+GET     /docs/                      controllers.Assets.at(path="/public/swagger",file="index.html")
+GET     /docs/*file                 controllers.Assets.at(path="/public/swagger",file)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
