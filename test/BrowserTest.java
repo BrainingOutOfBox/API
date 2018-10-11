@@ -23,7 +23,7 @@ public class BrowserTest extends WithBrowser {
      */
     @Test
     public void test() {
-        browser.goTo("http://sinv-56079.edu.hsr.ch:" + play.api.test.Helpers.testServerPort());
+        browser.goTo("localhost:" + play.api.test.Helpers.testServerPort());
         assertTrue(browser.pageSource().contains("Your new application is ready."));
     }
 
