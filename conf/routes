@@ -3,15 +3,28 @@
 # ~~~~
 
 # An example controller showing a sample home page
++ noJwtFilter
 GET     /                           controllers.HomeController.index
 
++ noJwtFilter
+POST    /login                      controllers.HomeController.login()
+
+GET     /requires-jwt-via-filter    controllers.HomeController.requiresJwtViaFilter
+
++ noJwtFilter
 GET     /timing/new                 controllers.TimerController.createTimer
+
++ noJwtFilter
 GET     /timing/diff                controllers.TimerController.calculateDateDifference
 
 # swagger routes
++ noJwtFilter
 GET     /swagger.json               controllers.ApiHelpController.getResources
++ noJwtFilter
 GET     /docs/                      controllers.Assets.at(path="/public/swagger",file="index.html")
++ noJwtFilter
 GET     /docs/*file                 controllers.Assets.at(path="/public/swagger",file)
 
 # Map static resources from the /public folder to the /assets URL path
++ noJwtFilter
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
