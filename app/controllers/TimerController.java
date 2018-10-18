@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 @Api(value = "/time", description = "All operations with time", produces = "application/json")
 public class TimerController extends Controller {
 
-    final long ONE_MINUTE_IN_MILLIS = 60000;
     private DateTime finishDate;
     private DateTime nowDate;
 
