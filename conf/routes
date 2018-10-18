@@ -12,6 +12,9 @@ POST    /login                      controllers.HomeController.login()
 GET     /requires-jwt-via-filter    controllers.HomeController.requiresJwtViaFilter
 
 + noJwtFilter
+GET     /:teamName/getBrainstromingFindings  controllers.FindingController.getBrainstormingFindingFromTeam(teamName)
+
++ noJwtFilter
 GET     /timing/new                 controllers.TimerController.createTimer
 
 + noJwtFilter
