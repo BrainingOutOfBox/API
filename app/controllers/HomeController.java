@@ -5,10 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.typesafe.config.Config;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import jwt.VerifiedJwt;
 import jwt.filter.Attrs;
 import play.Logger;
@@ -71,7 +68,7 @@ public class HomeController extends Controller {
         return JWT.create()
                 .withIssuer("ThePlayApp")
                 .withClaim("user_id", userId)
-                .withExpiresAt(Date.from(ZonedDateTime.now(ZoneId.systemDefault()).plusMinutes(10).toInstant()))
+                .withExpiresAt(Date.from(ZonedDateTime.now(ZoneId.systemDefault()).plusMinutes(120).toInstant()))
                 .sign(algorithm);
     }
 
@@ -80,7 +77,7 @@ public class HomeController extends Controller {
         return oVerifiedJwt.map(jwt -> {
             Logger.debug(jwt.toString());
             return ok("access granted via filter");
-        }).orElse(forbidden("eh, no verified jwt found, " + oVerifiedJwt.toString()));
+        }).orElse(forbidden("eh, no verified jwt found"));
     }
 
 
