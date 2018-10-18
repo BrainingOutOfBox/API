@@ -15,3 +15,6 @@ libraryDependencies += "io.swagger" %% "swagger-play2" % "1.6.0"
 
 // JWT
 libraryDependencies += "com.auth0" % "java-jwt" % "3.2.0"
+
+// MongoDB async driver
+libraryDependencies += "org.mongodb" % "mongodb-driver-async" % "3.8.0"
