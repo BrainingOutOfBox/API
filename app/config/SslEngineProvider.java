@@ -1,6 +1,6 @@
 package config;
 
-import play.server.ApplicationProvider;
+import play.core.ApplicationProvider;
 import play.server.api.SSLEngineProvider;
 
 import javax.net.ssl.*;
