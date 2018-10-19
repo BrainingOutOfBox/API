@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class SslEngineProvider implements SSLEngineProvider {
@@ -30,7 +31,7 @@ public class SslEngineProvider implements SSLEngineProvider {
     public SSLEngine createSSLEngine() {
         SSLContext context = createSSLContext();
         SSLEngine engine = context.createSSLEngine();
-        List<String> cipherSuites = Arrays.asList(engine.getEnabledCipherSuites());
+        List<String> cipherSuites = new LinkedList<>(Arrays.asList(engine.getEnabledCipherSuites()));
         priorityCipherSuites.removeIf(c -> cipherSuites.contains(c));
         engine.setEnabledCipherSuites(priorityCipherSuites.toArray(new String[0]));
         SSLParameters params = engine.getSSLParameters();
