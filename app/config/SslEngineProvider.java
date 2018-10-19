@@ -16,7 +16,7 @@ import java.util.List;
 
 public class SslEngineProvider implements SSLEngineProvider {
     private ApplicationProvider applicationProvider;
-    private final String KEYSTORE_PATH = "/etc/letsencrypt/live/sinv-56079.edu.hsr.ch/keyStore.jks";
+    private final String KEYSTORE_PATH = "~/.keystore/keyStore.jks";
     private final List<String> priorityCipherSuites = Arrays.asList(
             "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
             "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
