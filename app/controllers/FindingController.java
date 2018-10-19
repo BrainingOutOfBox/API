@@ -54,7 +54,7 @@ public class FindingController extends Controller {
             nickname = "createBrainstormingFinding",
             value = "Create a brainstormingFinding",
             notes = "With this method you can create a brainstormingFinding",
-            httpMethod = "GET",
+            httpMethod = "POST",
             response = SuccessMessage.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
