@@ -3,31 +3,54 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.Block;
 import com.mongodb.ConnectionString;
+import com.mongodb.MongoException;
 import com.mongodb.async.SingleResultCallback;
 import com.mongodb.async.client.MongoClient;
 import com.mongodb.async.client.MongoClients;
 import com.mongodb.async.client.MongoCollection;
 import com.mongodb.async.client.MongoDatabase;
 import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Updates.*;
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+
 import io.swagger.annotations.*;
-import models.ErrorMessage;
-import models.SuccessMessage;
-import org.bson.Document;
-import play.Logger;
+import models.*;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
+import org.joda.time.DateTime;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 
 import java.util.ArrayList;
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 
 
 @Api(value = "/BrainstormingFinding", description = "All operations with brainstormingFindings", produces = "application/json")
 public class FindingController extends Controller {
 
-    MongoClient mongoClient;
-    MongoDatabase database;
+    private MongoClient mongoClient;
+    private MongoDatabase database;
+    CodecRegistry pojoCodecRegistry;
+    MongoCollection<BrainstormingFinding> collection;
+
+
+    public FindingController(){
+        pojoCodecRegistry = fromRegistries(MongoClients.getDefaultCodecRegistry(), fromProviders(PojoCodecProvider.builder().automatic(true).build()));
+        mongoClient = MongoClients.create(new ConnectionString("mongodb://api:Methode746@localhost:40002/?authSource=admin"));
+
+        database = mongoClient.getDatabase("Test");
+        database = database.withCodecRegistry(pojoCodecRegistry);
+
+        collection = database.getCollection("BrainstormingFinding", BrainstormingFinding.class);
+
+
+
+    }
 
     @ApiOperation(
             nickname = "createBrainstormingFinding",
@@ -41,15 +64,39 @@ public class FindingController extends Controller {
     public Result createBrainstormingFindingForTeam(@ApiParam(value = "BrainstormingTeam Name", name = "teamName", required = true) String teamName){
 
         JsonNode body = request().body().asJson();
+        BrainstormingFinding finding;
 
         if (body == null) {
-            Logger.error("json body is null");
             return forbidden(Json.toJson(new ErrorMessage("Error", "json body is null")));
+        } else {
+
+            BrainstormingTeam team = new BrainstormingTeam("DemoTeam", "Demo", 4, new ArrayList<>(), new Participant());
+
+            ArrayList<Brainsheet> brainsheets = new ArrayList<>();
+            for(int i = 0; i < team.getNrOfParticipants(); i++){
+                brainsheets.add(new Brainsheet());
+            }
+
+            finding = new BrainstormingFinding(
+                    body.findPath("name").textValue(),
+                    body.findPath("problemDescription").textValue(),
+                    body.findPath("nrOfIdeas").asInt(),
+                    body.findPath("baseRoundTime").asInt(),
+                    1,
+                    new DateTime().plusMinutes(body.findPath("baseRoundTime").asInt()).toString(),
+                    brainsheets,
+                    team);
         }
 
 
+        collection.insertOne(finding, new SingleResultCallback<Void>() {
+            @Override
+            public void onResult(Void result, Throwable t) {
+                System.out.println("Inserted!");
+            }
+        });
 
-        return null;
+        return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingFinding successfully inserted")));
     }
 
 
@@ -64,41 +111,24 @@ public class FindingController extends Controller {
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     public Result getBrainstormingFindingFromTeam(@ApiParam(value = "BrainstormingTeam Name", name = "teamName", required = true) String teamName) throws ExecutionException, InterruptedException {
 
-        mongoClient = MongoClients.create(new ConnectionString("mongodb://api:Methode746@localhost:40002/?authSource=admin"));
-        database = mongoClient.getDatabase("Test");
-        MongoCollection<Document> collection = database.getCollection("BrainstormingFinding");
+        CompletableFuture<Queue<BrainstormingFinding>> future = new CompletableFuture<>();
+        Queue<BrainstormingFinding> queue = new ConcurrentLinkedQueue<>();
 
-        CompletableFuture<String> res = new CompletableFuture<>();
-        final String[] test = {new String()};
-/*
-        collection.find(eq("brainstormingTeam", "DemoTeam")).first(
-        new SingleResultCallback<Document>() {
-            @Override
-            public void onResult(final Document document, final Throwable t) {
-                System.out.println(document.toJson());
-                res.complete(document.toJson());
-            }
-        });
+        collection.find(eq("brainstormingTeam.name", teamName)).forEach(
+            new Block<BrainstormingFinding>() {
+                @Override
+                public void apply(final BrainstormingFinding document) {
+                    queue.add(document);
+                }
+            }, new SingleResultCallback<Void>() {
+                @Override
+                public void onResult(final Void result, final Throwable t) {
+                    System.out.println("Operation Finished!");
+                    future.complete(queue);
+                }
+            });
 
-
-        return ok(result.get());
-*/
-
-        collection.find(eq("brainstormingTeam", teamName)).forEach(
-                new Block<Document>() {
-                    @Override
-                    public void apply(final Document document) {
-                        System.out.println(document.toJson());
-                        test[0] += document.toJson();
-                    }
-                }, new SingleResultCallback<Void>() {
-                    @Override
-                    public void onResult(final Void result, final Throwable t) {
-                        System.out.println("Operation Finished!");
-                        res.complete(test[0]);
-                    }
-                });
-        return ok(res.get());
+        return ok(Json.toJson(future.get()));
     }
 
 }
