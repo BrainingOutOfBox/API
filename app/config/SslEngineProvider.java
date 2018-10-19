@@ -32,7 +32,7 @@ public class SslEngineProvider implements SSLEngineProvider {
         SSLContext context = createSSLContext();
         SSLEngine engine = context.createSSLEngine();
         List<String> cipherSuites = new LinkedList<>(Arrays.asList(engine.getEnabledCipherSuites()));
-        priorityCipherSuites.removeIf(c -> cipherSuites.contains(c));
+        priorityCipherSuites.removeIf(c -> !cipherSuites.contains(c));
         engine.setEnabledCipherSuites(priorityCipherSuites.toArray(new String[0]));
         SSLParameters params = engine.getSSLParameters();
         params.setUseCipherSuitesOrder(true);
