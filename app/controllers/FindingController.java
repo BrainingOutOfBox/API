@@ -41,7 +41,7 @@ public class FindingController extends Controller {
 
     public FindingController(){
         pojoCodecRegistry = fromRegistries(MongoClients.getDefaultCodecRegistry(), fromProviders(PojoCodecProvider.builder().automatic(true).build()));
-        mongoClient = MongoClients.create(new ConnectionString("mongodb://api:Methode746@localhost:40002/?authSource=admin&authMechanism=SCRAM-SHA-1"));
+        mongoClient = MongoClients.create(new ConnectionString("mongodb://play:Methode746@localhost:40002/?authSource=admin&authMechanism=SCRAM-SHA-1"));
 
         database = mongoClient.getDatabase("Test");
         database = database.withCodecRegistry(pojoCodecRegistry);
