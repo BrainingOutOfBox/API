@@ -18,7 +18,7 @@ import java.util.List;
 public class SslEngineProvider implements SSLEngineProvider {
     private ApplicationProvider applicationProvider;
     private final String KEYSTORE_PATH = "/distelli/envs/.keystore/keyStore.jks";
-    private final List<String> priorityCipherSuites = Arrays.asList(
+    private List<String> priorityCipherSuites = Arrays.asList(
             "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
             "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
             "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA");
@@ -31,11 +31,10 @@ public class SslEngineProvider implements SSLEngineProvider {
     public SSLEngine createSSLEngine() {
         SSLContext context = createSSLContext();
         SSLEngine engine = context.createSSLEngine();
-        List<String> cipherSuiteIntersect = priorityCipherSuites;
         List<String> cipherSuites = Arrays.asList(engine.getEnabledCipherSuites());
-        cipherSuiteIntersect.retainAll(cipherSuites);
+        priorityCipherSuites.retainAll(cipherSuites);
 
-        engine.setEnabledCipherSuites(cipherSuiteIntersect.toArray(new String[0]));
+        engine.setEnabledCipherSuites(priorityCipherSuites.toArray(new String[0]));
         SSLParameters params = engine.getSSLParameters();
         params.setUseCipherSuitesOrder(true);
         engine.setSSLParameters(params);
