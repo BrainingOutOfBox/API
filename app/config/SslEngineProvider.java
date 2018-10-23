@@ -18,10 +18,10 @@ import java.util.List;
 public class SslEngineProvider implements SSLEngineProvider {
     private ApplicationProvider applicationProvider;
     private final String KEYSTORE_PATH = "/distelli/envs/.keystore/keyStore.jks";
-    private List<String> priorityCipherSuites = Arrays.asList(
+    private ArrayList<String> priorityCipherSuites = new ArrayList<>(Arrays.asList(
             "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
             "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
-            "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA");
+            "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA"));
 
     public SslEngineProvider(ApplicationProvider applicationProvider) {
         this.applicationProvider = applicationProvider;
