@@ -23,7 +23,7 @@ public class SslEngineProvider implements SSLEngineProvider {
             "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
             "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
             "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA",
-            "TLS_RSA__WITH_AES_256_CBC_SHA"));
+            "TLS_RSA_WITH_AES_256_CBC_SHA"));
 
     public SslEngineProvider(ApplicationProvider applicationProvider) {
         this.applicationProvider = applicationProvider;
