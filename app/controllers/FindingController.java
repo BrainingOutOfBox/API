@@ -71,33 +71,17 @@ public class FindingController extends Controller {
                     body.hasNonNull("nrOfIdeas") &&
                     body.hasNonNull("baseRoundTime")) {
 
-            BrainstormingTeam team = new BrainstormingTeam("DemoTeam", "Demo", 4, new ArrayList<>(), new Participant());
+            BrainstormingFinding finding = createBrainstormFinding(body);
 
-            ArrayList<Brainsheet> brainsheets = new ArrayList<>();
-            for(int i = 0; i < team.getNrOfParticipants(); i++){
-                brainsheets.add(new Brainsheet());
-            }
-
-            BrainstormingFinding finding = new BrainstormingFinding(
-                    body.get("name").asText(),
-                    body.get("problemDescription").asText(),
-                    body.get("nrOfIdeas").asInt(),
-                    body.get("baseRoundTime").asInt(),
-                    1,
-                    new DateTime().plusMinutes(body.get("baseRoundTime").asInt()).toString(),
-                    brainsheets,
-                    team);
-
-        collection.insertOne(finding, new SingleResultCallback<Void>() {
-            @Override
-            public void onResult(Void result, Throwable t) {
-                Logger.info("Inserted BrainstormFinding!");
-            }
-        });
+            collection.insertOne(finding, new SingleResultCallback<Void>() {
+                @Override
+                public void onResult(Void result, Throwable t) {
+                    Logger.info("Inserted BrainstormFinding!");
+                }
+            });
 
         return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingFinding successfully inserted")));
         }
-
 
         return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
     }
@@ -132,6 +116,41 @@ public class FindingController extends Controller {
             });
 
         return ok(Json.toJson(future.get()));
+    }
+
+    private BrainstormingFinding createBrainstormFinding(JsonNode body){
+        BrainstormingTeam team = new BrainstormingTeam("DemoTeam", "Demo", 4, new ArrayList<>(), new Participant());
+
+        ArrayList<Brainsheet> brainsheets = new ArrayList<>();
+        ArrayList<Brainwave> brainwaves = new ArrayList<>();
+        ArrayList<Idea> ideas = new ArrayList<>();
+
+        //creating ideas
+        for (int k = 0; k < body.get("nrOfIdeas").asInt(); k++){
+            ideas.add(new Idea(""));
+        }
+        //creating brainwaves
+        for (int j = 0; j < team.getNrOfParticipants(); j++){
+
+            brainwaves.add(new Brainwave(j, ideas));
+        }
+        //creating brainsheets
+        for(int i = 0; i < team.getNrOfParticipants(); i++){
+
+            brainsheets.add(new Brainsheet(team.getNrOfParticipants(), brainwaves));
+        }
+
+        BrainstormingFinding finding = new BrainstormingFinding(
+                body.get("name").asText(),
+                body.get("problemDescription").asText(),
+                body.get("nrOfIdeas").asInt(),
+                body.get("baseRoundTime").asInt(),
+                1,
+                new DateTime().plusMinutes(body.get("baseRoundTime").asInt()).toString(),
+                brainsheets,
+                team);
+
+        return finding;
     }
 
 }
