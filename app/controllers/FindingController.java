@@ -19,6 +19,7 @@ import models.*;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -62,11 +63,13 @@ public class FindingController extends Controller {
     public Result createBrainstormingFindingForTeam(@ApiParam(value = "BrainstormingTeam Name", name = "teamName", required = true) String teamName){
 
         JsonNode body = request().body().asJson();
-        BrainstormingFinding finding;
 
-        if (body == null) {
+        if (body == null ) {
             return forbidden(Json.toJson(new ErrorMessage("Error", "json body is null")));
-        } else {
+        } else if(  body.hasNonNull("name") &&
+                    body.hasNonNull("problemDescription") &&
+                    body.hasNonNull("nrOfIdeas") &&
+                    body.hasNonNull("baseRoundTime")) {
 
             BrainstormingTeam team = new BrainstormingTeam("DemoTeam", "Demo", 4, new ArrayList<>(), new Participant());
 
@@ -75,26 +78,28 @@ public class FindingController extends Controller {
                 brainsheets.add(new Brainsheet());
             }
 
-            finding = new BrainstormingFinding(
-                    body.findPath("name").textValue(),
-                    body.findPath("problemDescription").textValue(),
-                    body.findPath("nrOfIdeas").asInt(),
-                    body.findPath("baseRoundTime").asInt(),
+            BrainstormingFinding finding = new BrainstormingFinding(
+                    body.get("name").asText(),
+                    body.get("problemDescription").asText(),
+                    body.get("nrOfIdeas").asInt(),
+                    body.get("baseRoundTime").asInt(),
                     1,
-                    new DateTime().plusMinutes(body.findPath("baseRoundTime").asInt()).toString(),
+                    new DateTime().plusMinutes(body.get("baseRoundTime").asInt()).toString(),
                     brainsheets,
                     team);
-        }
-
 
         collection.insertOne(finding, new SingleResultCallback<Void>() {
             @Override
             public void onResult(Void result, Throwable t) {
-                System.out.println("Inserted!");
+                Logger.info("Inserted BrainstormFinding!");
             }
         });
 
         return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingFinding successfully inserted")));
+        }
+
+
+        return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
     }
 
 
@@ -103,9 +108,9 @@ public class FindingController extends Controller {
             value = "Get all brainstormingFinding",
             notes = "With this method you can get all brainstormingFinding from a specific team",
             httpMethod = "GET",
-            response = SuccessMessage.class)
+            response = BrainstormingFinding.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
+            @ApiResponse(code = 200, message = "OK", response = BrainstormingFinding.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     public Result getBrainstormingFindingFromTeam(@ApiParam(value = "BrainstormingTeam Name", name = "teamName", required = true) String teamName) throws ExecutionException, InterruptedException {
 
@@ -115,13 +120,13 @@ public class FindingController extends Controller {
         collection.find(eq("brainstormingTeam.name", teamName)).forEach(
             new Block<BrainstormingFinding>() {
                 @Override
-                public void apply(final BrainstormingFinding document) {
-                    queue.add(document);
+                public void apply(final BrainstormingFinding finding) {
+                    queue.add(finding);
                 }
             }, new SingleResultCallback<Void>() {
                 @Override
                 public void onResult(final Void result, final Throwable t) {
-                    System.out.println("Operation Finished!");
+                    Logger.info("Get all BrainstormFinding for team!");
                     future.complete(queue);
                 }
             });
