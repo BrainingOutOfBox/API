@@ -7,9 +7,9 @@
 GET     /                                           controllers.HomeController.index
 
 + noJwtFilter
-POST    /login                                      controllers.HomeController.login
+POST    /login                                      controllers.TeamController.login
 
-GET     /requires-jwt-via-filter                    controllers.HomeController.requiresJwtViaFilter
+GET     /requires-jwt-via-filter                    controllers.TeamController.requiresJwtViaFilter
 
 + noJwtFilter
 GET     /:teamIdentifier/getBrainstormingFinding    controllers.FindingController.getBrainstormingFindingFromTeam(teamIdentifier)
