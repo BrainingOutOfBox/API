@@ -11,6 +11,7 @@ public final class BrainstormingTeam {
     private String name;
     private String purpose;
     private int nrOfParticipants;
+    private int currentNrOfParticipants;
     private ArrayList<Participant> participants;
     private Participant moderator;
 
@@ -18,11 +19,12 @@ public final class BrainstormingTeam {
 
     }
 
-    public BrainstormingTeam(String name, String purpose, int nrOfParticipants, ArrayList<Participant> participants, Participant moderator) {
+    public BrainstormingTeam(String name, String purpose, int nrOfParticipants, int currentNrOfParticipants, ArrayList<Participant> participants, Participant moderator) {
         this.identifier = UUID.randomUUID().toString();
         this.name = name;
         this.purpose = purpose;
         this.nrOfParticipants = nrOfParticipants;
+        this.currentNrOfParticipants = currentNrOfParticipants;
         this.participants = participants;
         this.moderator = moderator;
     }
@@ -65,6 +67,14 @@ public final class BrainstormingTeam {
 
     public void setNrOfParticipants(int nrOfParticipants) {
         this.nrOfParticipants = nrOfParticipants;
+    }
+
+    public int getCurrentNrOfParticipants() {
+        return currentNrOfParticipants;
+    }
+
+    public void setCurrentNrOfParticipants(int currentNrOfParticipants) {
+        this.currentNrOfParticipants = currentNrOfParticipants;
     }
 
     public ArrayList<Participant> getParticipants() {
