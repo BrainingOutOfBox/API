@@ -135,7 +135,5 @@ public class TeamController extends Controller {
             return ok(Json.toJson(new SuccessMessage("Success", "access granted via filter")));
         }).orElse(forbidden(Json.toJson(new ErrorMessage("Error","eh, no verified jwt found"))));
     }
-
-
-
+    
 }
