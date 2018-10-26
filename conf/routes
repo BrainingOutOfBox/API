@@ -7,7 +7,11 @@
 GET     /                                           controllers.HomeController.index
 
 + noJwtFilter
-POST    /login                                      controllers.TeamController.login
+POST    /login                                      controllers.ParticipantController.login
++ noJwtFilter
+POST    /createBrainstormingTeam                    controllers.TeamController.createBrainstormingTeam
++ noJwtFilter
+GET     /:participant/getMyBrainstormingTeam        controllers.TeamController.getBrainstormingTeamForParticipant(participant)
 
 GET     /requires-jwt-via-filter                    controllers.TeamController.requiresJwtViaFilter
 
