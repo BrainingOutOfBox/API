@@ -3,9 +3,11 @@ package models;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public final class BrainstormingTeam {
     private ObjectId id;
+    private String identifier;
     private String name;
     private String purpose;
     private int nrOfParticipants;
@@ -17,6 +19,7 @@ public final class BrainstormingTeam {
     }
 
     public BrainstormingTeam(String name, String purpose, int nrOfParticipants, ArrayList<Participant> participants, Participant moderator) {
+        this.identifier = UUID.randomUUID().toString();
         this.name = name;
         this.purpose = purpose;
         this.nrOfParticipants = nrOfParticipants;
@@ -30,6 +33,14 @@ public final class BrainstormingTeam {
 
     public void setId(ObjectId id) {
         this.id = id;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public String getName() {
