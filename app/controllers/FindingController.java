@@ -120,6 +120,8 @@ public class FindingController extends Controller {
 
     private BrainstormingFinding createBrainstormFinding(JsonNode body, String teamIdentifier){
 
+        //TODO create two persistanceServices (findings, teams), which can be injected and used
+        //This is just a demo team to have some information to try out.
         BrainstormingTeam team = new BrainstormingTeam("DemoTeam", "Demo", 4, 0, new ArrayList<>(), new Participant());
 
         ArrayList<Brainsheet> brainsheets = new ArrayList<>();
