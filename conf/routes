@@ -12,16 +12,16 @@ POST    /login                                      controllers.HomeController.l
 GET     /requires-jwt-via-filter                    controllers.HomeController.requiresJwtViaFilter
 
 + noJwtFilter
-GET     /:teamName/getBrainstormingFinding          controllers.FindingController.getBrainstormingFindingFromTeam(teamName)
+GET     /:teamIdentifier/getBrainstormingFinding    controllers.FindingController.getBrainstormingFindingFromTeam(teamIdentifier)
 + noJwtFilter
-POST     /:teamName/createBrainstormingFinding      controllers.FindingController.createBrainstormingFindingForTeam(teamName)
+POST    /:teamIdentifier/createBrainstormingFinding controllers.FindingController.createBrainstormingFindingForTeam(teamIdentifier)
 
 + noJwtFilter
 GET     /timing/new                                 controllers.TimerController.createTimer
 + noJwtFilter
 GET     /timing/diff                                controllers.TimerController.calculateDateDifference
 + noJwtFilter
-GET     /:teamName/:findingName/diff                controllers.TimerController.calculateDateDifferenceOfFindingFromTeam(teamName, findingName)
+GET     /:teamIdentifier/:findingIdentifier/diff    controllers.TimerController.calculateDateDifferenceOfFindingFromTeam(teamIdentifier, findingIdentifier)
 
 # swagger routes
 + noJwtFilter
