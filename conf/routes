@@ -4,33 +4,33 @@
 
 # An example controller showing a sample home page
 + noJwtFilter
-GET     /                                           controllers.HomeController.index
+GET     /                                                   controllers.HomeController.index
 
 + noJwtFilter
-POST    /login                                      controllers.ParticipantController.login
+POST    /login                                              controllers.ParticipantController.login
 + noJwtFilter
-POST    /createBrainstormingTeam                    controllers.TeamController.createBrainstormingTeam
+POST    /createBrainstormingTeam                            controllers.TeamController.createBrainstormingTeam
 + noJwtFilter
-GET     /:participant/getMyBrainstormingTeam        controllers.TeamController.getBrainstormingTeamForParticipant(participant)
+GET     /:participant/getMyBrainstormingTeams               controllers.TeamController.getBrainstormingTeamForParticipant(participant)
 
-GET     /requires-jwt-via-filter                    controllers.TeamController.requiresJwtViaFilter
-
-+ noJwtFilter
-GET     /:teamIdentifier/getBrainstormingFinding    controllers.FindingController.getBrainstormingFindingFromTeam(teamIdentifier)
-+ noJwtFilter
-POST    /:teamIdentifier/createBrainstormingFinding controllers.FindingController.createBrainstormingFindingForTeam(teamIdentifier)
+GET     /requires-jwt-via-filter                            controllers.TeamController.requiresJwtViaFilter
 
 + noJwtFilter
-GET     /:teamIdentifier/:findingIdentifier/diff    controllers.TimerController.calculateDateDifferenceOfFindingFromTeam(teamIdentifier, findingIdentifier)
+GET     /:teamIdentifier/getBrainstormingFindings           controllers.FindingController.getBrainstormingFindingFromTeam(teamIdentifier)
++ noJwtFilter
+POST    /:teamIdentifier/createBrainstormingFinding         controllers.FindingController.createBrainstormingFindingForTeam(teamIdentifier)
+
++ noJwtFilter
+GET     /:teamIdentifier/:findingIdentifier/remainingTime   controllers.TimerController.calculateRemainingTimeOfFindingFromTeam(teamIdentifier, findingIdentifier)
 
 # swagger routes
 + noJwtFilter
-GET     /swagger.json                               controllers.ApiHelpController.getResources
+GET     /swagger.json                                       controllers.ApiHelpController.getResources
 + noJwtFilter
-GET     /docs/                                      controllers.Assets.at(path="/public/swagger",file="index.html")
+GET     /docs/                                              controllers.Assets.at(path="/public/swagger",file="index.html")
 + noJwtFilter
-GET     /docs/*file                                 controllers.Assets.at(path="/public/swagger",file)
+GET     /docs/*file                                         controllers.Assets.at(path="/public/swagger",file)
 
 # Map static resources from the /public folder to the /assets URL path
 + noJwtFilter
-GET     /assets/*file                               controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file                                       controllers.Assets.versioned(path="/public", file: Asset)
