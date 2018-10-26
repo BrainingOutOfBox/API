@@ -10,6 +10,14 @@ public final class Participant {
     private String lastname;
 
     public Participant() {
+
+    }
+
+    public Participant(String username, String password, String firstname, String lastname) {
+        this.username = username;
+        this.password = password;
+        this.firstname = firstname;
+        this.lastname = lastname;
     }
 
     public ObjectId getId() {
