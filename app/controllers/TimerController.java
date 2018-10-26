@@ -92,13 +92,13 @@ public class TimerController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result calculateDateDifferenceOfFindingFromTeam(@ApiParam(value = "BrainstormingTeam Name", name = "teamName", required = true) String teamName, @ApiParam(value = "BrainstormingFinding Name", name = "findingName", required = true) String findingName) throws ExecutionException, InterruptedException {
+    public Result calculateDateDifferenceOfFindingFromTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier, @ApiParam(value = "BrainstormingFinding Identifier", name = "findingIdentifier", required = true) String findingIdentifier) throws ExecutionException, InterruptedException {
 
         CompletableFuture<BrainstormingFinding> future = new CompletableFuture<>();
         DateTime currentRoundEndTime;
         DateTime nowDate;
 
-        collection.find(and(eq("brainstormingTeam.name", teamName),eq("name", findingName))).first(new SingleResultCallback<BrainstormingFinding>() {
+        collection.find(and(eq("brainstormingTeam", teamIdentifier),eq("identifier", findingIdentifier))).first(new SingleResultCallback<BrainstormingFinding>() {
             @Override
             public void onResult(final BrainstormingFinding brainstormFinding, final Throwable t) {
                 Logger.info(brainstormFinding.getCurrentRoundEndTime());

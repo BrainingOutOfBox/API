@@ -60,7 +60,7 @@ public class FindingController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result createBrainstormingFindingForTeam(@ApiParam(value = "BrainstormingTeam Name", name = "teamName", required = true) String teamName){
+    public Result createBrainstormingFindingForTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier){
 
         JsonNode body = request().body().asJson();
 
@@ -71,7 +71,7 @@ public class FindingController extends Controller {
                     body.hasNonNull("nrOfIdeas") &&
                     body.hasNonNull("baseRoundTime")) {
 
-            BrainstormingFinding finding = createBrainstormFinding(body);
+            BrainstormingFinding finding = createBrainstormFinding(body, teamIdentifier);
 
             collection.insertOne(finding, new SingleResultCallback<Void>() {
                 @Override
@@ -101,7 +101,7 @@ public class FindingController extends Controller {
         CompletableFuture<Queue<BrainstormingFinding>> future = new CompletableFuture<>();
         Queue<BrainstormingFinding> queue = new ConcurrentLinkedQueue<>();
 
-        collection.find(eq("brainstormingTeam.name", teamName)).forEach(
+        collection.find(eq("brainstormingTeam", teamName)).forEach(
             new Block<BrainstormingFinding>() {
                 @Override
                 public void apply(final BrainstormingFinding finding) {
@@ -118,7 +118,8 @@ public class FindingController extends Controller {
         return ok(Json.toJson(future.get()));
     }
 
-    private BrainstormingFinding createBrainstormFinding(JsonNode body){
+    private BrainstormingFinding createBrainstormFinding(JsonNode body, String teamIdentifier){
+
         BrainstormingTeam team = new BrainstormingTeam("DemoTeam", "Demo", 4, new ArrayList<>(), new Participant());
 
         ArrayList<Brainsheet> brainsheets = new ArrayList<>();
@@ -137,7 +138,7 @@ public class FindingController extends Controller {
         //creating brainsheets
         for(int i = 0; i < team.getNrOfParticipants(); i++){
 
-            brainsheets.add(new Brainsheet(team.getNrOfParticipants(), brainwaves));
+            brainsheets.add(new Brainsheet(i, brainwaves));
         }
 
         BrainstormingFinding finding = new BrainstormingFinding(
@@ -148,7 +149,7 @@ public class FindingController extends Controller {
                 1,
                 new DateTime().plusMinutes(body.get("baseRoundTime").asInt()).toString(),
                 brainsheets,
-                team);
+                teamIdentifier);
 
         return finding;
     }
