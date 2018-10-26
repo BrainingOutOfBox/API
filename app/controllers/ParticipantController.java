@@ -4,6 +4,12 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.ConnectionString;
+import com.mongodb.async.SingleResultCallback;
+import com.mongodb.async.client.MongoClient;
+import com.mongodb.async.client.MongoClients;
+import com.mongodb.async.client.MongoCollection;
+import com.mongodb.async.client.MongoDatabase;
 import com.typesafe.config.Config;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -11,8 +17,12 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import jwt.VerifiedJwt;
 import jwt.filter.Attrs;
+import models.BrainstormingTeam;
 import models.ErrorMessage;
+import models.Participant;
 import models.SuccessMessage;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -24,12 +34,35 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.and;
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 @Api(value = "/Participant", description = "All operations with participant", produces = "application/json")
 public class ParticipantController extends Controller {
 
     @Inject
     private Config config;
+
+    private MongoClient mongoClient;
+    private MongoDatabase database;
+    CodecRegistry pojoCodecRegistry;
+    MongoCollection<Participant> collection;
+
+    public ParticipantController(){
+        pojoCodecRegistry = fromRegistries(MongoClients.getDefaultCodecRegistry(), fromProviders(PojoCodecProvider.builder().automatic(true).build()));
+        mongoClient = MongoClients.create(new ConnectionString("mongodb://play:Methode746@localhost:40002/?authSource=admin&authMechanism=SCRAM-SHA-1"));
+
+        database = mongoClient.getDatabase("Test");
+        database = database.withCodecRegistry(pojoCodecRegistry);
+
+        collection = database.getCollection("Participant", Participant.class);
+
+    }
 
     @ApiOperation(
             nickname = "login",
@@ -40,7 +73,7 @@ public class ParticipantController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = Json.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result login() throws UnsupportedEncodingException {
+    public Result login() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
         JsonNode body = request().body().asJson();
 
         if (body == null) {
@@ -49,9 +82,30 @@ public class ParticipantController extends Controller {
         }
 
         if (body.hasNonNull("username") && body.hasNonNull("password")) {
-            ObjectNode result = Json.newObject();
-            result.put("access_token", getSignedToken(7l));
-            return ok(result);
+            CompletableFuture<Participant> future = new CompletableFuture<>();
+
+            collection.find(and(eq("username", body.get("username").asText()),
+                                eq("password", body.get("password").asText()))).first(new SingleResultCallback<Participant>() {
+                @Override
+                public void onResult(Participant participant, Throwable t) {
+                    if (participant != null) {
+                        future.complete(participant);
+                    } else {
+                        future.complete(null);
+                    }
+                }
+            });
+
+            if (future.get()!= null){
+                ObjectNode result = Json.newObject();
+                result.putPOJO("participant", future.get());
+                result.put("access_token", getSignedToken(7l));
+                return ok(result);
+            } else {
+                Logger.info("username or password not correct");
+                return forbidden(Json.toJson(new ErrorMessage("Error", "username or password not correct")));
+            }
+
         } else {
             Logger.error("json body not as expected: {}", body.toString());
             return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
