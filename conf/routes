@@ -9,6 +9,9 @@ GET     /                                                   controllers.HomeCont
 + noJwtFilter
 POST    /login                                              controllers.ParticipantController.login
 
++ noJwtFilter
+POST    /register                                           controllers.ParticipantController.createParticipant
+
 GET     /requires-jwt-via-filter                            controllers.ParticipantController.requiresJwtViaFilter
 
 + noJwtFilter

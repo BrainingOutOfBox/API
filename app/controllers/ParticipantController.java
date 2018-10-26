@@ -69,9 +69,9 @@ public class ParticipantController extends Controller {
             value = "Login",
             notes = "With this method you can login an get a jwt Token",
             httpMethod = "GET",
-            response = Json.class)
+            response = Participant.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = Json.class),
+            @ApiResponse(code = 200, message = "OK", response = Participant.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     public Result login() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
         JsonNode body = request().body().asJson();
@@ -89,6 +89,7 @@ public class ParticipantController extends Controller {
                 @Override
                 public void onResult(Participant participant, Throwable t) {
                     if (participant != null) {
+                        Logger.info("found participant");
                         future.complete(participant);
                     } else {
                         future.complete(null);
@@ -111,6 +112,41 @@ public class ParticipantController extends Controller {
             return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
         }
 
+    }
+
+    @ApiOperation(
+            nickname = "createParticipant",
+            value = "Create a participant",
+            notes = "With this method you can create a participant",
+            httpMethod = "POST",
+            response = SuccessMessage.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
+            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    public Result createParticipant(){
+
+        JsonNode body = request().body().asJson();
+
+        if (body == null ) {
+            return forbidden(Json.toJson(new ErrorMessage("Error", "json body is null")));
+        } else if(  body.hasNonNull("username") &&
+                body.hasNonNull("password") &&
+                body.hasNonNull("firstname") &&
+                body.hasNonNull("lastname")) {
+
+            Participant participant = new Participant(body.get("username").asText(), body.get("password").asText(), body.get("firstname").asText(), body.get("lastname").asText());
+
+            collection.insertOne(participant, new SingleResultCallback<Void>() {
+                @Override
+                public void onResult(Void result, Throwable t) {
+                    Logger.info("Inserted Participant!");
+                }
+            });
+
+            return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully inserted")));
+        }
+
+        return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
     }
 
     private String getSignedToken(Long userId) throws UnsupportedEncodingException {
