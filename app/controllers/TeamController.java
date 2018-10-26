@@ -128,12 +128,4 @@ public class TeamController extends Controller {
         return ok(Json.toJson(future.get()));
     }
 
-    public Result requiresJwtViaFilter() {
-        Optional<VerifiedJwt> oVerifiedJwt = request().attrs().getOptional(Attrs.VERIFIED_JWT);
-        return oVerifiedJwt.map(jwt -> {
-            Logger.debug(jwt.toString());
-            return ok(Json.toJson(new SuccessMessage("Success", "access granted via filter")));
-        }).orElse(forbidden(Json.toJson(new ErrorMessage("Error","eh, no verified jwt found"))));
-    }
-    
 }

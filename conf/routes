@@ -8,12 +8,14 @@ GET     /                                                   controllers.HomeCont
 
 + noJwtFilter
 POST    /login                                              controllers.ParticipantController.login
+
+GET     /requires-jwt-via-filter                            controllers.ParticipantController.requiresJwtViaFilter
+
 + noJwtFilter
 POST    /createBrainstormingTeam                            controllers.TeamController.createBrainstormingTeam
 + noJwtFilter
 GET     /:participant/getMyBrainstormingTeams               controllers.TeamController.getBrainstormingTeamForParticipant(participant)
 
-GET     /requires-jwt-via-filter                            controllers.TeamController.requiresJwtViaFilter
 
 + noJwtFilter
 GET     /:teamIdentifier/getBrainstormingFindings           controllers.FindingController.getBrainstormingFindingFromTeam(teamIdentifier)

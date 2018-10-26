@@ -9,7 +9,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import jwt.VerifiedJwt;
+import jwt.filter.Attrs;
 import models.ErrorMessage;
+import models.SuccessMessage;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -20,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.Optional;
 
 @Api(value = "/Participant", description = "All operations with participant", produces = "application/json")
 public class ParticipantController extends Controller {
@@ -64,5 +68,13 @@ public class ParticipantController extends Controller {
                 .withClaim("user_id", userId)
                 .withExpiresAt(Date.from(ZonedDateTime.now(ZoneId.systemDefault()).plusMinutes(120).toInstant()))
                 .sign(algorithm);
+    }
+
+    public Result requiresJwtViaFilter() {
+        Optional<VerifiedJwt> oVerifiedJwt = request().attrs().getOptional(Attrs.VERIFIED_JWT);
+        return oVerifiedJwt.map(jwt -> {
+            Logger.debug(jwt.toString());
+            return ok(Json.toJson(new SuccessMessage("Success", "access granted via filter")));
+        }).orElse(forbidden(Json.toJson(new ErrorMessage("Error","eh, no verified jwt found"))));
     }
 }
