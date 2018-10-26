@@ -96,12 +96,12 @@ public class FindingController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = BrainstormingFinding.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result getBrainstormingFindingFromTeam(@ApiParam(value = "BrainstormingTeam Name", name = "teamName", required = true) String teamName) throws ExecutionException, InterruptedException {
+    public Result getBrainstormingFindingFromTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
 
         CompletableFuture<Queue<BrainstormingFinding>> future = new CompletableFuture<>();
         Queue<BrainstormingFinding> queue = new ConcurrentLinkedQueue<>();
 
-        collection.find(eq("brainstormingTeam", teamName)).forEach(
+        collection.find(eq("brainstormingTeam", teamIdentifier)).forEach(
             new Block<BrainstormingFinding>() {
                 @Override
                 public void apply(final BrainstormingFinding finding) {
@@ -120,7 +120,7 @@ public class FindingController extends Controller {
 
     private BrainstormingFinding createBrainstormFinding(JsonNode body, String teamIdentifier){
 
-        BrainstormingTeam team = new BrainstormingTeam("DemoTeam", "Demo", 4, new ArrayList<>(), new Participant());
+        BrainstormingTeam team = new BrainstormingTeam("DemoTeam", "Demo", 4, 0, new ArrayList<>(), new Participant());
 
         ArrayList<Brainsheet> brainsheets = new ArrayList<>();
         ArrayList<Brainwave> brainwaves = new ArrayList<>();
