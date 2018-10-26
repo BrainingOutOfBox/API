@@ -32,9 +32,6 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 @Api(value = "/Timing", description = "All operations with time", produces = "application/json")
 public class TimerController extends Controller {
 
-    private DateTime finishDate;
-    private DateTime nowDate;
-
     private MongoClient mongoClient;
     private MongoDatabase database;
     CodecRegistry pojoCodecRegistry;
@@ -49,38 +46,6 @@ public class TimerController extends Controller {
 
         collection = database.getCollection("BrainstormingFinding", BrainstormingFinding.class);
 
-    }
-
-    @ApiOperation(
-            nickname = "createTimer",
-            value = "Create a timer",
-            notes = "With this method you can create a timer",
-            httpMethod = "GET",
-            response = SuccessMessage.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
-            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result createTimer() {
-        finishDate = new DateTime().plusMinutes(5);
-        return ok(Json.toJson(new SuccessMessage("Success", finishDate.toString())));
-    }
-
-    @ApiOperation(
-            nickname = "calculateTimeDifference",
-            value = "Calculate difference in time",
-            notes = "With this method you can calculate the time difference from now to init date",
-            httpMethod = "GET",
-            response = SuccessMessage.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
-            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result calculateDateDifference(){
-        long difference = 0;
-        if (finishDate != null) {
-            nowDate = new DateTime();
-            difference = getDateDiff(finishDate, nowDate, TimeUnit.MILLISECONDS);
-        }
-        return ok(Json.toJson(difference));
     }
 
     @ApiOperation(

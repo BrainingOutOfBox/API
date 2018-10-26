@@ -17,10 +17,6 @@ GET     /:teamIdentifier/getBrainstormingFinding    controllers.FindingControlle
 POST    /:teamIdentifier/createBrainstormingFinding controllers.FindingController.createBrainstormingFindingForTeam(teamIdentifier)
 
 + noJwtFilter
-GET     /timing/new                                 controllers.TimerController.createTimer
-+ noJwtFilter
-GET     /timing/diff                                controllers.TimerController.calculateDateDifference
-+ noJwtFilter
 GET     /:teamIdentifier/:findingIdentifier/diff    controllers.TimerController.calculateDateDifferenceOfFindingFromTeam(teamIdentifier, findingIdentifier)
 
 # swagger routes
