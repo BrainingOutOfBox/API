@@ -3,6 +3,10 @@ package models;
 public final class Idea {
     private String description;
 
+    public Idea() {
+
+    }
+
     public Idea(String description) {
         this.description = description;
     }

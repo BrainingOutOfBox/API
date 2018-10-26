@@ -7,6 +7,12 @@ public final class Brainwave {
     ArrayList<Idea> ideas;
 
     public Brainwave() {
+
+    }
+
+    public Brainwave(int nrOfBrainwave, ArrayList<Idea> ideas) {
+        this.nrOfBrainwave = nrOfBrainwave;
+        this.ideas = ideas;
     }
 
     public int getNrOfBrainwave() {

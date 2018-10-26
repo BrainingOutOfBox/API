@@ -1,12 +1,14 @@
 package models;
 
 import org.bson.types.ObjectId;
-import org.joda.time.DateTime;
+import com.mongodb.DBRef;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class BrainstormingFinding {
     private ObjectId id;
+    private String identifier;
     private String name;
     private String problemDescription;
     private int nrOfIdeas;
@@ -14,13 +16,14 @@ public class BrainstormingFinding {
     private int currentRound;
     private String currentRoundEndTime;
     private ArrayList<Brainsheet> brainsheets;
-    private BrainstormingTeam brainstormingTeam;
+    private String brainstormingTeam;
 
     public BrainstormingFinding(){
 
     }
 
-    public BrainstormingFinding(String name, String problemDescription, int nrOfIdeas, int baseRoundTime, int currentRound, String currentRoundEndTime, ArrayList<Brainsheet> brainsheets, BrainstormingTeam brainstormingTeam) {
+    public BrainstormingFinding(String name, String problemDescription, int nrOfIdeas, int baseRoundTime, int currentRound, String currentRoundEndTime, ArrayList<Brainsheet> brainsheets, String brainstormingTeam) {
+        this.identifier = UUID.randomUUID().toString();
         this.name = name;
         this.problemDescription = problemDescription;
         this.nrOfIdeas = nrOfIdeas;
@@ -37,6 +40,14 @@ public class BrainstormingFinding {
 
     public void setId(ObjectId id) {
         this.id = id;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public String getName() {
@@ -95,11 +106,11 @@ public class BrainstormingFinding {
         this.brainsheets = brainsheets;
     }
 
-    public BrainstormingTeam getBrainstormingTeam() {
+    public String getBrainstormingTeam() {
         return brainstormingTeam;
     }
 
-    public void setBrainstormingTeam(BrainstormingTeam brainstormingTeam) {
+    public void setBrainstormingTeam(String brainstormingTeam) {
         this.brainstormingTeam = brainstormingTeam;
     }
 }

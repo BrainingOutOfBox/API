@@ -4,32 +4,33 @@
 
 # An example controller showing a sample home page
 + noJwtFilter
-GET     /                           controllers.HomeController.index
+GET     /                                                   controllers.HomeController.index
 
 + noJwtFilter
-POST    /login                      controllers.HomeController.login
-
-GET     /requires-jwt-via-filter    controllers.HomeController.requiresJwtViaFilter
-
+POST    /login                                              controllers.ParticipantController.login
 + noJwtFilter
-GET     /:teamName/getBrainstormingFinding  controllers.FindingController.getBrainstormingFindingFromTeam(teamName)
+POST    /createBrainstormingTeam                            controllers.TeamController.createBrainstormingTeam
 + noJwtFilter
-POST     /:teamName/createBrainstormingFinding  controllers.FindingController.createBrainstormingFindingForTeam(teamName)
+GET     /:participant/getMyBrainstormingTeams               controllers.TeamController.getBrainstormingTeamForParticipant(participant)
 
-+ noJwtFilter
-GET     /timing/new                 controllers.TimerController.createTimer
+GET     /requires-jwt-via-filter                            controllers.TeamController.requiresJwtViaFilter
 
 + noJwtFilter
-GET     /timing/diff                controllers.TimerController.calculateDateDifference
+GET     /:teamIdentifier/getBrainstormingFindings           controllers.FindingController.getBrainstormingFindingFromTeam(teamIdentifier)
++ noJwtFilter
+POST    /:teamIdentifier/createBrainstormingFinding         controllers.FindingController.createBrainstormingFindingForTeam(teamIdentifier)
+
++ noJwtFilter
+GET     /:teamIdentifier/:findingIdentifier/remainingTime   controllers.TimerController.calculateRemainingTimeOfFindingFromTeam(teamIdentifier, findingIdentifier)
 
 # swagger routes
 + noJwtFilter
-GET     /swagger.json               controllers.ApiHelpController.getResources
+GET     /swagger.json                                       controllers.ApiHelpController.getResources
 + noJwtFilter
-GET     /docs/                      controllers.Assets.at(path="/public/swagger",file="index.html")
+GET     /docs/                                              controllers.Assets.at(path="/public/swagger",file="index.html")
 + noJwtFilter
-GET     /docs/*file                 controllers.Assets.at(path="/public/swagger",file)
+GET     /docs/*file                                         controllers.Assets.at(path="/public/swagger",file)
 
 # Map static resources from the /public folder to the /assets URL path
 + noJwtFilter
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file                                       controllers.Assets.versioned(path="/public", file: Asset)
