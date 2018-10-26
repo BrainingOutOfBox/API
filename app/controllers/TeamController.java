@@ -1,9 +1,6 @@
 package controllers;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.Block;
 import com.mongodb.ConnectionString;
 import com.mongodb.async.SingleResultCallback;
@@ -11,10 +8,7 @@ import com.mongodb.async.client.MongoClient;
 import com.mongodb.async.client.MongoClients;
 import com.mongodb.async.client.MongoCollection;
 import com.mongodb.async.client.MongoDatabase;
-import com.typesafe.config.Config;
 import io.swagger.annotations.*;
-import jwt.VerifiedJwt;
-import jwt.filter.Attrs;
 import models.*;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -22,15 +16,7 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.*;
 
-import views.html.*;
-
-import javax.inject.Inject;
-import java.io.UnsupportedEncodingException;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
