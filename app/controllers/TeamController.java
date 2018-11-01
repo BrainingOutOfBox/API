@@ -52,9 +52,9 @@ public class TeamController extends Controller {
             value = "Create a brainstormingTeam",
             notes = "With this method you can create a brainstormingTeam",
             httpMethod = "POST",
-            response = BrainstormingTeam.class)
+            response = SuccessMessage.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = BrainstormingTeam.class),
+            @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     public Result createBrainstormingTeam(){
 
@@ -92,7 +92,7 @@ public class TeamController extends Controller {
             httpMethod = "DELETE",
             response = SuccessMessage.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = BrainstormingTeam.class),
+            @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     public Result deleteBrainstormingTeam() throws ExecutionException, InterruptedException {
 
