@@ -10,6 +10,7 @@ import com.mongodb.async.client.MongoClient;
 import com.mongodb.async.client.MongoClients;
 import com.mongodb.async.client.MongoCollection;
 import com.mongodb.async.client.MongoDatabase;
+import com.mongodb.client.result.DeleteResult;
 import com.typesafe.config.Config;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -89,7 +90,7 @@ public class ParticipantController extends Controller {
                 @Override
                 public void onResult(Participant participant, Throwable t) {
                     if (participant != null) {
-                        Logger.info("found participant");
+                        Logger.info("Found participant");
                         future.complete(participant);
                     } else {
                         future.complete(null);
@@ -144,6 +145,48 @@ public class ParticipantController extends Controller {
             });
 
             return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully inserted")));
+        }
+
+        return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
+    }
+
+    @ApiOperation(
+            nickname = "deleteParticipant",
+            value = "Delete a participant",
+            notes = "With this method you can delete a participant",
+            httpMethod = "DELETE",
+            response = SuccessMessage.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
+            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    public Result deleteParticipant() throws ExecutionException, InterruptedException {
+
+        JsonNode body = request().body().asJson();
+
+        if (body == null ) {
+            return forbidden(Json.toJson(new ErrorMessage("Error", "json body is null")));
+        } else if(  body.hasNonNull("username") &&
+                body.hasNonNull("password") &&
+                body.hasNonNull("firstname") &&
+                body.hasNonNull("lastname")) {
+
+            CompletableFuture<DeleteResult> future = new CompletableFuture<>();
+
+            collection.deleteOne(and(   eq("username", body.get("username").asText()),
+                                        eq("password", body.get("password").asText())), new SingleResultCallback<DeleteResult>() {
+                @Override
+                public void onResult(final DeleteResult result, final Throwable t) {
+                    Logger.info(result.getDeletedCount() + " Participant successfully deleted");
+                    future.complete(result);
+                }
+            });
+
+            if (future.get().getDeletedCount() > 0){
+                return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully deleted")));
+            } else {
+                return ok(Json.toJson(new ErrorMessage("Error", "No Participant deleted! Is username and password correct?")));
+            }
+
         }
 
         return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));

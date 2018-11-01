@@ -11,6 +11,8 @@ POST    /login                                              controllers.Particip
 
 + noJwtFilter
 POST    /register                                           controllers.ParticipantController.createParticipant
++ noJwtFilter
+DELETE  /deleteAccount                                      controllers.ParticipantController.deleteParticipant
 
 GET     /requires-jwt-via-filter                            controllers.ParticipantController.requiresJwtViaFilter
 
