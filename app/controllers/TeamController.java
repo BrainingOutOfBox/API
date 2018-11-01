@@ -8,6 +8,7 @@ import com.mongodb.async.client.MongoClient;
 import com.mongodb.async.client.MongoClients;
 import com.mongodb.async.client.MongoCollection;
 import com.mongodb.async.client.MongoDatabase;
+import com.mongodb.client.result.DeleteResult;
 import io.swagger.annotations.*;
 import models.*;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -22,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 
+import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -78,6 +80,46 @@ public class TeamController extends Controller {
             });
 
             return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingTeam successfully inserted")));
+        }
+
+        return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
+    }
+
+    @ApiOperation(
+            nickname = "deleteBrainstormingTeam",
+            value = "Delete a brainstormingTeam",
+            notes = "With this method you can delete a brainstormingTeam",
+            httpMethod = "DELETE",
+            response = SuccessMessage.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = BrainstormingTeam.class),
+            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    public Result deleteBrainstormingTeam() throws ExecutionException, InterruptedException {
+
+        JsonNode body = request().body().asJson();
+
+        if (body == null ) {
+            return forbidden(Json.toJson(new ErrorMessage("Error", "json body is null")));
+        } else if(  body.hasNonNull("identifier") &&
+                    body.hasNonNull("moderator")) {
+
+            CompletableFuture<DeleteResult> future = new CompletableFuture<>();
+
+            collection.deleteOne(and(   eq("identifier", body.get("identifier").asText()),
+                                        eq("moderator.username", body.findPath("username").asText()),
+                                        eq("moderator.password", body.findPath("password").asText())), new SingleResultCallback<DeleteResult>() {
+                @Override
+                public void onResult(final DeleteResult result, final Throwable t) {
+                    Logger.info(result.getDeletedCount() + " Team successfully deleted");
+                    future.complete(result);
+                }
+            });
+
+            if (future.get().getDeletedCount() > 0){
+                return ok(Json.toJson(new SuccessMessage("Success", "Team successfully deleted")));
+            } else {
+                return ok(Json.toJson(new ErrorMessage("Error", "No Team deleted! Does the identifier exist and is moderator's username and password correct?")));
+            }
         }
 
         return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));

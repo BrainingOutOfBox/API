@@ -19,6 +19,8 @@ GET     /requires-jwt-via-filter                            controllers.Particip
 + noJwtFilter
 POST    /createBrainstormingTeam                            controllers.TeamController.createBrainstormingTeam
 + noJwtFilter
+DELETE  /deleteBrainstormingTeam                            controllers.TeamController.deleteBrainstormingTeam
++ noJwtFilter
 GET     /:participant/getMyBrainstormingTeams               controllers.TeamController.getBrainstormingTeamForParticipant(participant)
 
 
