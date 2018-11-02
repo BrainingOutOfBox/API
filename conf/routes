@@ -4,47 +4,47 @@
 
 # An example controller showing a sample home page
 + noJwtFilter
-GET     /                                                   controllers.HomeController.index
+GET     /                                                           controllers.HomeController.index
 
 + noJwtFilter
-POST    /login                                              controllers.ParticipantController.login
+POST    /Participant/login                                          controllers.ParticipantController.login
 
 + noJwtFilter
-POST    /register                                           controllers.ParticipantController.createParticipant
+POST    /Participant/register                                       controllers.ParticipantController.createParticipant
 + noJwtFilter
-DELETE  /deleteAccount                                      controllers.ParticipantController.deleteParticipant
+DELETE  /Participant/deleteAccount                                  controllers.ParticipantController.deleteParticipant
 
-GET     /requires-jwt-via-filter                            controllers.ParticipantController.requiresJwtViaFilter
-
-+ noJwtFilter
-POST    /createBrainstormingTeam                            controllers.TeamController.createBrainstormingTeam
-+ noJwtFilter
-DELETE  /deleteBrainstormingTeam                            controllers.TeamController.deleteBrainstormingTeam
-+ noJwtFilter
-GET     /:participant/getMyBrainstormingTeams               controllers.TeamController.getBrainstormingTeamForParticipant(participant)
-+ noJwtFilter
-PUT     /:teamIdentifier/joinTeam                           controllers.TeamController.joinBrainstormingTeam(teamIdentifier)
-+ noJwtFilter
-PUT     /:teamIdentifier/leaveTeam                          controllers.TeamController.leaveBrainstormingTeam(teamIdentifier)
-+ noJwtFilter
-GET     /:teamIdentifier                                    controllers.TeamController.getBrainstormingTeamByIdentifier(teamIdentifier)
+GET     /Participant/requires-jwt-via-filter                        controllers.ParticipantController.requiresJwtViaFilter
 
 + noJwtFilter
-GET     /:teamIdentifier/getBrainstormingFindings           controllers.FindingController.getBrainstormingFindingFromTeam(teamIdentifier)
+POST    /Team/createBrainstormingTeam                               controllers.TeamController.createBrainstormingTeam
 + noJwtFilter
-POST    /:teamIdentifier/createBrainstormingFinding         controllers.FindingController.createBrainstormingFindingForTeam(teamIdentifier)
+DELETE  /Team/deleteBrainstormingTeam                               controllers.TeamController.deleteBrainstormingTeam
++ noJwtFilter
+GET     /Team/:participant/getMyBrainstormingTeams                  controllers.TeamController.getBrainstormingTeamForParticipant(participant)
++ noJwtFilter
+PUT     /Team/:teamIdentifier/joinTeam                              controllers.TeamController.joinBrainstormingTeam(teamIdentifier)
++ noJwtFilter
+PUT     /Team/:teamIdentifier/leaveTeam                             controllers.TeamController.leaveBrainstormingTeam(teamIdentifier)
++ noJwtFilter
+GET     /Team/:teamIdentifier                                       controllers.TeamController.getBrainstormingTeamByIdentifier(teamIdentifier)
 
 + noJwtFilter
-GET     /:teamIdentifier/:findingIdentifier/remainingTime   controllers.TimerController.calculateRemainingTimeOfFindingFromTeam(teamIdentifier, findingIdentifier)
+GET     /Finding/:teamIdentifier/getBrainstormingFindings           controllers.FindingController.getBrainstormingFindingFromTeam(teamIdentifier)
++ noJwtFilter
+POST    /Finding/:teamIdentifier/createBrainstormingFinding         controllers.FindingController.createBrainstormingFindingForTeam(teamIdentifier)
+
++ noJwtFilter
+GET     /Finding/:teamIdentifier/:findingIdentifier/remainingTime   controllers.TimerController.calculateRemainingTimeOfFindingFromTeam(teamIdentifier, findingIdentifier)
 
 # swagger routes
 + noJwtFilter
-GET     /swagger.json                                       controllers.ApiHelpController.getResources
+GET     /swagger.json                                               controllers.ApiHelpController.getResources
 + noJwtFilter
-GET     /docs/                                              controllers.Assets.at(path="/public/swagger",file="index.html")
+GET     /docs/                                                      controllers.Assets.at(path="/public/swagger",file="index.html")
 + noJwtFilter
-GET     /docs/*file                                         controllers.Assets.at(path="/public/swagger",file)
+GET     /docs/*file                                                 controllers.Assets.at(path="/public/swagger",file)
 
 # Map static resources from the /public folder to the /assets URL path
 + noJwtFilter
-GET     /assets/*file                                       controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file                                               controllers.Assets.versioned(path="/public", file: Asset)

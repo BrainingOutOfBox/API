@@ -193,8 +193,8 @@ public class TeamController extends Controller {
             CompletableFuture<DeleteResult> future = new CompletableFuture<>();
 
             teamCollection.deleteOne(and(   eq("identifier", body.get("identifier").asText()),
-                                        eq("moderator.username", body.findPath("username").asText()),
-                                        eq("moderator.password", body.findPath("password").asText())), new SingleResultCallback<DeleteResult>() {
+                                            eq("moderator.username", body.findPath("username").asText()),
+                                            eq("moderator.password", body.findPath("password").asText())), new SingleResultCallback<DeleteResult>() {
                 @Override
                 public void onResult(final DeleteResult result, final Throwable t) {
                     Logger.info(result.getDeletedCount() + " Team successfully deleted");
