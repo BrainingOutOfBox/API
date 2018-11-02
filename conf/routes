@@ -22,7 +22,11 @@ POST    /createBrainstormingTeam                            controllers.TeamCont
 DELETE  /deleteBrainstormingTeam                            controllers.TeamController.deleteBrainstormingTeam
 + noJwtFilter
 GET     /:participant/getMyBrainstormingTeams               controllers.TeamController.getBrainstormingTeamForParticipant(participant)
-
++ noJwtFilter
+PUT     /:teamIdentifier/joinTeam                           controllers.TeamController.joinBrainstormingTeam(teamIdentifier)
++ noJwtFilter
+PUT     /:teamIdentifier/leaveTeam                          controllers.TeamController.leaveBrainstormingTeam(teamIdentifier)
+# GET   /:teamIdentifier                                    controllers.TeamController.getTeam(teamIdentifier)
 
 + noJwtFilter
 GET     /:teamIdentifier/getBrainstormingFindings           controllers.FindingController.getBrainstormingFindingFromTeam(teamIdentifier)
