@@ -18,7 +18,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import jwt.VerifiedJwt;
 import jwt.filter.Attrs;
-import models.BrainstormingTeam;
 import models.ErrorMessage;
 import models.Participant;
 import models.SuccessMessage;
@@ -52,7 +51,7 @@ public class ParticipantController extends Controller {
     private MongoClient mongoClient;
     private MongoDatabase database;
     CodecRegistry pojoCodecRegistry;
-    MongoCollection<Participant> collection;
+    MongoCollection<Participant> participantCollection;
 
     public ParticipantController(){
         pojoCodecRegistry = fromRegistries(MongoClients.getDefaultCodecRegistry(), fromProviders(PojoCodecProvider.builder().automatic(true).build()));
@@ -61,7 +60,7 @@ public class ParticipantController extends Controller {
         database = mongoClient.getDatabase("Test");
         database = database.withCodecRegistry(pojoCodecRegistry);
 
-        collection = database.getCollection("Participant", Participant.class);
+        participantCollection = database.getCollection("Participant", Participant.class);
 
     }
 
@@ -85,8 +84,8 @@ public class ParticipantController extends Controller {
         if (body.hasNonNull("username") && body.hasNonNull("password")) {
             CompletableFuture<Participant> future = new CompletableFuture<>();
 
-            collection.find(and(eq("username", body.get("username").asText()),
-                                eq("password", body.get("password").asText()))).first(new SingleResultCallback<Participant>() {
+            participantCollection.find(and( eq("username", body.get("username").asText()),
+                                            eq("password", body.get("password").asText()))).first(new SingleResultCallback<Participant>() {
                 @Override
                 public void onResult(Participant participant, Throwable t) {
                     if (participant != null) {
@@ -137,7 +136,7 @@ public class ParticipantController extends Controller {
 
             Participant participant = new Participant(body.get("username").asText(), body.get("password").asText(), body.get("firstname").asText(), body.get("lastname").asText());
 
-            collection.insertOne(participant, new SingleResultCallback<Void>() {
+            participantCollection.insertOne(participant, new SingleResultCallback<Void>() {
                 @Override
                 public void onResult(Void result, Throwable t) {
                     Logger.info("Inserted Participant!");
@@ -172,7 +171,7 @@ public class ParticipantController extends Controller {
 
             CompletableFuture<DeleteResult> future = new CompletableFuture<>();
 
-            collection.deleteOne(and(   eq("username", body.get("username").asText()),
+            participantCollection.deleteOne(and(   eq("username", body.get("username").asText()),
                                         eq("password", body.get("password").asText())), new SingleResultCallback<DeleteResult>() {
                 @Override
                 public void onResult(final DeleteResult result, final Throwable t) {

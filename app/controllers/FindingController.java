@@ -3,14 +3,12 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.Block;
 import com.mongodb.ConnectionString;
-import com.mongodb.MongoException;
 import com.mongodb.async.SingleResultCallback;
 import com.mongodb.async.client.MongoClient;
 import com.mongodb.async.client.MongoClients;
 import com.mongodb.async.client.MongoCollection;
 import com.mongodb.async.client.MongoDatabase;
 import static com.mongodb.client.model.Filters.*;
-import static com.mongodb.client.model.Updates.*;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
@@ -37,7 +35,7 @@ public class FindingController extends Controller {
     private MongoClient mongoClient;
     private MongoDatabase database;
     CodecRegistry pojoCodecRegistry;
-    MongoCollection<BrainstormingFinding> collection;
+    MongoCollection<BrainstormingFinding> findingCollection;
 
 
     public FindingController(){
@@ -47,7 +45,7 @@ public class FindingController extends Controller {
         database = mongoClient.getDatabase("Test");
         database = database.withCodecRegistry(pojoCodecRegistry);
 
-        collection = database.getCollection("BrainstormingFinding", BrainstormingFinding.class);
+        findingCollection = database.getCollection("BrainstormingFinding", BrainstormingFinding.class);
 
     }
 
@@ -73,7 +71,7 @@ public class FindingController extends Controller {
 
             BrainstormingFinding finding = createBrainstormFinding(body, teamIdentifier);
 
-            collection.insertOne(finding, new SingleResultCallback<Void>() {
+            findingCollection.insertOne(finding, new SingleResultCallback<Void>() {
                 @Override
                 public void onResult(Void result, Throwable t) {
                     Logger.info("Inserted BrainstormFinding!");
@@ -101,7 +99,7 @@ public class FindingController extends Controller {
         CompletableFuture<Queue<BrainstormingFinding>> future = new CompletableFuture<>();
         Queue<BrainstormingFinding> queue = new ConcurrentLinkedQueue<>();
 
-        collection.find(eq("brainstormingTeam", teamIdentifier)).forEach(
+        findingCollection.find(eq("brainstormingTeam", teamIdentifier)).forEach(
             new Block<BrainstormingFinding>() {
                 @Override
                 public void apply(final BrainstormingFinding finding) {
