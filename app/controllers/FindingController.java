@@ -46,7 +46,6 @@ public class FindingController extends Controller {
         database = database.withCodecRegistry(pojoCodecRegistry);
 
         findingCollection = database.getCollection("BrainstormingFinding", BrainstormingFinding.class);
-
     }
 
     @ApiOperation(
@@ -58,7 +57,7 @@ public class FindingController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result createBrainstormingFindingForTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier){
+    public Result createBrainstormingFindingForTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
 
         JsonNode body = request().body().asJson();
 
@@ -69,14 +68,20 @@ public class FindingController extends Controller {
                     body.hasNonNull("nrOfIdeas") &&
                     body.hasNonNull("baseRoundTime")) {
 
-            BrainstormingFinding finding = createBrainstormFinding(body, teamIdentifier);
+            TeamController teamController = new TeamController();
+            BrainstormingTeam team = teamController.getBrainstormingTeam(teamIdentifier);
+            if (team != null) {
+                BrainstormingFinding finding = createBrainstormingFinding(body, team);
 
-            findingCollection.insertOne(finding, new SingleResultCallback<Void>() {
-                @Override
-                public void onResult(Void result, Throwable t) {
-                    Logger.info("Inserted BrainstormFinding!");
-                }
-            });
+                findingCollection.insertOne(finding, new SingleResultCallback<Void>() {
+                    @Override
+                    public void onResult(Void result, Throwable t) {
+                        Logger.info("Inserted BrainstormFinding!");
+                    }
+                });
+            } else {
+                return ok(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam with this identifier found")));
+            }
 
         return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingFinding successfully inserted")));
         }
@@ -116,11 +121,7 @@ public class FindingController extends Controller {
         return ok(Json.toJson(future.get()));
     }
 
-    private BrainstormingFinding createBrainstormFinding(JsonNode body, String teamIdentifier){
-
-        //TODO create two persistanceServices (findings, teams), which can be injected and used
-        //This is just a demo team to have some information to try out.
-        BrainstormingTeam team = new BrainstormingTeam("DemoTeam", "Demo", 4, 0, new ArrayList<>(), new Participant());
+    private BrainstormingFinding createBrainstormingFinding(JsonNode body, BrainstormingTeam team) {
 
         ArrayList<Brainsheet> brainsheets = new ArrayList<>();
         ArrayList<Brainwave> brainwaves = new ArrayList<>();
@@ -149,7 +150,7 @@ public class FindingController extends Controller {
                 1,
                 new DateTime().plusMinutes(body.get("baseRoundTime").asInt()).toString(),
                 brainsheets,
-                teamIdentifier);
+                team.getIdentifier());
 
         return finding;
     }

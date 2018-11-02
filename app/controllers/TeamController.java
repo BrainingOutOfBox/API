@@ -109,18 +109,10 @@ public class TeamController extends Controller {
                     body.hasNonNull("lastname")) {
 
             Participant participant = new Participant(body.findPath("username").asText() , body.findPath("password").asText(), body.findPath("firstname").asText(), body.findPath("lastname").asText());
-            CompletableFuture<BrainstormingTeam> teamFuture = new CompletableFuture<>();
+            BrainstormingTeam brainstormingTeam = getBrainstormingTeam(teamIdentifier);
 
-            teamCollection.find(eq("identifier", teamIdentifier)).first(new SingleResultCallback<BrainstormingTeam>() {
-                @Override
-                public void onResult(BrainstormingTeam team, Throwable t) {
-                    Logger.info("Found team to update");
-                    teamFuture.complete(team);
-                }
-            });
+            if (brainstormingTeam!= null && brainstormingTeam.getNrOfParticipants() > brainstormingTeam.getCurrentNrOfParticipants() && brainstormingTeam.joinTeam(participant)) {
 
-            BrainstormingTeam brainstormingTeam = teamFuture.get();
-            if (brainstormingTeam.getNrOfParticipants() > brainstormingTeam.getCurrentNrOfParticipants() && brainstormingTeam.joinTeam(participant)) {
                 teamCollection.updateOne(eq("identifier", teamIdentifier),combine(set("participants", brainstormingTeam.getParticipants()), inc("currentNrOfParticipants", 1)), new SingleResultCallback<UpdateResult>() {
                     @Override
                     public void onResult(final UpdateResult result, final Throwable t) {
@@ -131,7 +123,7 @@ public class TeamController extends Controller {
                 return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully added to the brainstormingTeam")));
 
             } else {
-                return ok(Json.toJson(new ErrorMessage("Error", "The limit of the team size is reached or the participant is already in the brainstormingTeam")));
+                return ok(Json.toJson(new ErrorMessage("Error", "The limit of the team size is reached or the participant is already in the brainstormingTeam or this team does not exist")));
             }
         }
 
@@ -159,19 +151,9 @@ public class TeamController extends Controller {
                     body.hasNonNull("lastname")) {
 
             Participant participant = new Participant(body.findPath("username").asText() , body.findPath("password").asText(), body.findPath("firstname").asText(), body.findPath("lastname").asText());
-            CompletableFuture<BrainstormingTeam> teamFuture = new CompletableFuture<>();
+            BrainstormingTeam brainstormingTeam = getBrainstormingTeam(teamIdentifier);
 
-            teamCollection.find(eq("identifier", teamIdentifier)).first(new SingleResultCallback<BrainstormingTeam>() {
-                @Override
-                public void onResult(BrainstormingTeam team, Throwable t) {
-                    Logger.info("Found team to update");
-                    teamFuture.complete(team);
-                }
-            });
-
-
-            BrainstormingTeam brainstormingTeam = teamFuture.get();
-            if (brainstormingTeam.getCurrentNrOfParticipants() > 0 && brainstormingTeam.leaveTeam(participant)) {
+            if (brainstormingTeam != null && brainstormingTeam.getCurrentNrOfParticipants() > 0 && brainstormingTeam.leaveTeam(participant)) {
 
                 teamCollection.updateOne(eq("identifier", teamIdentifier),combine(set("participants", brainstormingTeam.getParticipants()), inc("currentNrOfParticipants", -1)), new SingleResultCallback<UpdateResult>() {
                     @Override
@@ -183,7 +165,7 @@ public class TeamController extends Controller {
                 return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully removed from the brainstormingTeam")));
 
             } else {
-                return ok(Json.toJson(new ErrorMessage("Error", "There are no more participants in the brainstormingTeam or the participant has already left the brainstormingTeam")));
+                return ok(Json.toJson(new ErrorMessage("Error", "There are no more participants in the brainstormingTeam or the participant has already left the brainstormingTeam or this team does not exist")));
             }
         }
 
@@ -271,6 +253,16 @@ public class TeamController extends Controller {
             @ApiResponse(code = 200, message = "OK", response = BrainstormingTeam.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     public Result getBrainstormingTeamByIdentifier(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
+        BrainstormingTeam team = getBrainstormingTeam(teamIdentifier);
+
+        if (team != null) {
+            return ok(Json.toJson(team));
+        } else {
+            return ok(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam found")));
+        }
+    }
+
+    public BrainstormingTeam getBrainstormingTeam(String teamIdentifier) throws ExecutionException, InterruptedException {
         CompletableFuture<BrainstormingTeam> future = new CompletableFuture<>();
 
         teamCollection.find(eq("identifier", teamIdentifier)).first(new SingleResultCallback<BrainstormingTeam>() {
@@ -284,10 +276,11 @@ public class TeamController extends Controller {
                 }
             }
         });
+
         if (future.get() != null) {
-            return ok(Json.toJson(future.get()));
+            return future.get();
         } else {
-            return ok(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam found")));
+            return null;
         }
     }
 
