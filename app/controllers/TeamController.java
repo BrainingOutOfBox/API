@@ -232,8 +232,8 @@ public class TeamController extends Controller {
 
 
     @ApiOperation(
-            nickname = "getBrainstormingTeam",
-            value = "Get all brainstormingTeam",
+            nickname = "getBrainstormingTeamForParticipant",
+            value = "Get all brainstormingTeams",
             notes = "With this method you can get all brainstormingTeams for specific participant",
             httpMethod = "GET",
             response = BrainstormingTeam.class)
@@ -259,6 +259,36 @@ public class TeamController extends Controller {
                 });
 
         return ok(Json.toJson(future.get()));
+    }
+
+    @ApiOperation(
+            nickname = "getBrainstormingTeam",
+            value = "Get a brainstormingTeam",
+            notes = "With this method you can get a brainstormingTeam by its identifier",
+            httpMethod = "GET",
+            response = BrainstormingTeam.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = BrainstormingTeam.class),
+            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    public Result getBrainstormingTeamByIdentifier(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
+        CompletableFuture<BrainstormingTeam> future = new CompletableFuture<>();
+
+        teamCollection.find(eq("identifier", teamIdentifier)).first(new SingleResultCallback<BrainstormingTeam>() {
+            @Override
+            public void onResult(BrainstormingTeam team, Throwable t) {
+                if (team != null) {
+                    Logger.info("Found brainstormingTeam");
+                    future.complete(team);
+                } else {
+                    future.complete(null);
+                }
+            }
+        });
+        if (future.get() != null) {
+            return ok(Json.toJson(future.get()));
+        } else {
+            return ok(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam found")));
+        }
     }
 
 }
