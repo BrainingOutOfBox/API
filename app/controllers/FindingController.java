@@ -3,14 +3,12 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.Block;
 import com.mongodb.ConnectionString;
-import com.mongodb.MongoException;
 import com.mongodb.async.SingleResultCallback;
 import com.mongodb.async.client.MongoClient;
 import com.mongodb.async.client.MongoClients;
 import com.mongodb.async.client.MongoCollection;
 import com.mongodb.async.client.MongoDatabase;
 import static com.mongodb.client.model.Filters.*;
-import static com.mongodb.client.model.Updates.*;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
@@ -37,7 +35,7 @@ public class FindingController extends Controller {
     private MongoClient mongoClient;
     private MongoDatabase database;
     CodecRegistry pojoCodecRegistry;
-    MongoCollection<BrainstormingFinding> collection;
+    MongoCollection<BrainstormingFinding> findingCollection;
 
 
     public FindingController(){
@@ -47,8 +45,7 @@ public class FindingController extends Controller {
         database = mongoClient.getDatabase("Test");
         database = database.withCodecRegistry(pojoCodecRegistry);
 
-        collection = database.getCollection("BrainstormingFinding", BrainstormingFinding.class);
-
+        findingCollection = database.getCollection("BrainstormingFinding", BrainstormingFinding.class);
     }
 
     @ApiOperation(
@@ -60,7 +57,7 @@ public class FindingController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result createBrainstormingFindingForTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier){
+    public Result createBrainstormingFindingForTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
 
         JsonNode body = request().body().asJson();
 
@@ -71,14 +68,20 @@ public class FindingController extends Controller {
                     body.hasNonNull("nrOfIdeas") &&
                     body.hasNonNull("baseRoundTime")) {
 
-            BrainstormingFinding finding = createBrainstormFinding(body, teamIdentifier);
+            TeamController teamController = new TeamController();
+            BrainstormingTeam team = teamController.getBrainstormingTeam(teamIdentifier);
+            if (team != null) {
+                BrainstormingFinding finding = createBrainstormingFinding(body, team);
 
-            collection.insertOne(finding, new SingleResultCallback<Void>() {
-                @Override
-                public void onResult(Void result, Throwable t) {
-                    Logger.info("Inserted BrainstormFinding!");
-                }
-            });
+                findingCollection.insertOne(finding, new SingleResultCallback<Void>() {
+                    @Override
+                    public void onResult(Void result, Throwable t) {
+                        Logger.info("Inserted BrainstormFinding!");
+                    }
+                });
+            } else {
+                return ok(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam with this identifier found")));
+            }
 
         return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingFinding successfully inserted")));
         }
@@ -101,7 +104,7 @@ public class FindingController extends Controller {
         CompletableFuture<Queue<BrainstormingFinding>> future = new CompletableFuture<>();
         Queue<BrainstormingFinding> queue = new ConcurrentLinkedQueue<>();
 
-        collection.find(eq("brainstormingTeam", teamIdentifier)).forEach(
+        findingCollection.find(eq("brainstormingTeam", teamIdentifier)).forEach(
             new Block<BrainstormingFinding>() {
                 @Override
                 public void apply(final BrainstormingFinding finding) {
@@ -118,9 +121,7 @@ public class FindingController extends Controller {
         return ok(Json.toJson(future.get()));
     }
 
-    private BrainstormingFinding createBrainstormFinding(JsonNode body, String teamIdentifier){
-
-        BrainstormingTeam team = new BrainstormingTeam("DemoTeam", "Demo", 4, 0, new ArrayList<>(), new Participant());
+    private BrainstormingFinding createBrainstormingFinding(JsonNode body, BrainstormingTeam team) {
 
         ArrayList<Brainsheet> brainsheets = new ArrayList<>();
         ArrayList<Brainwave> brainwaves = new ArrayList<>();
@@ -149,7 +150,7 @@ public class FindingController extends Controller {
                 1,
                 new DateTime().plusMinutes(body.get("baseRoundTime").asInt()).toString(),
                 brainsheets,
-                teamIdentifier);
+                team.getIdentifier());
 
         return finding;
     }

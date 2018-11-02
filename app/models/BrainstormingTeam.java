@@ -92,4 +92,30 @@ public final class BrainstormingTeam {
     public void setModerator(Participant moderator) {
         this.moderator = moderator;
     }
+
+    public boolean joinTeam(Participant participant){
+        if (contains(participant) == -1) {
+            this.participants.add(participant);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean leaveTeam(Participant participant){
+        int participantAtIndex = contains(participant);
+        if (participantAtIndex > -1) {
+            this.participants.remove(participantAtIndex);
+            return true;
+        }
+        return false;
+    }
+
+    public int contains(Participant participant){
+        for (int i = 0; i < participants.size(); i++){
+            if (participants.get(i).getUsername().equals(participant.getUsername())){
+                return i;
+            }
+        }
+        return -1;
+    }
 }

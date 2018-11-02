@@ -1,9 +1,6 @@
 package controllers;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.Block;
 import com.mongodb.ConnectionString;
 import com.mongodb.async.SingleResultCallback;
@@ -11,10 +8,10 @@ import com.mongodb.async.client.MongoClient;
 import com.mongodb.async.client.MongoClients;
 import com.mongodb.async.client.MongoCollection;
 import com.mongodb.async.client.MongoDatabase;
-import com.typesafe.config.Config;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 import io.swagger.annotations.*;
-import jwt.VerifiedJwt;
-import jwt.filter.Attrs;
 import models.*;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -22,21 +19,15 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.*;
 
-import views.html.*;
-
-import javax.inject.Inject;
-import java.io.UnsupportedEncodingException;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 
+import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Updates.*;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
@@ -46,7 +37,7 @@ public class TeamController extends Controller {
     private MongoClient mongoClient;
     private MongoDatabase database;
     CodecRegistry pojoCodecRegistry;
-    MongoCollection<BrainstormingTeam> collection;
+    MongoCollection<BrainstormingTeam> teamCollection;
 
     public TeamController(){
         pojoCodecRegistry = fromRegistries(MongoClients.getDefaultCodecRegistry(), fromProviders(PojoCodecProvider.builder().automatic(true).build()));
@@ -55,7 +46,7 @@ public class TeamController extends Controller {
         database = mongoClient.getDatabase("Test");
         database = database.withCodecRegistry(pojoCodecRegistry);
 
-        collection = database.getCollection("BrainstormingTeam", BrainstormingTeam.class);
+        teamCollection = database.getCollection("BrainstormingTeam", BrainstormingTeam.class);
 
     }
 
@@ -64,9 +55,9 @@ public class TeamController extends Controller {
             value = "Create a brainstormingTeam",
             notes = "With this method you can create a brainstormingTeam",
             httpMethod = "POST",
-            response = BrainstormingTeam.class)
+            response = SuccessMessage.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = BrainstormingTeam.class),
+            @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     public Result createBrainstormingTeam(){
 
@@ -84,7 +75,7 @@ public class TeamController extends Controller {
             participants.add(moderator);
             BrainstormingTeam team = new BrainstormingTeam(body.get("name").asText(), body.get("purpose").asText(), body.get("nrOfParticipants").asInt(), 1, participants, moderator);
 
-            collection.insertOne(team, new SingleResultCallback<Void>() {
+            teamCollection.insertOne(team, new SingleResultCallback<Void>() {
                 @Override
                 public void onResult(Void result, Throwable t) {
                     Logger.info("Inserted BrainstormingTeam!");
@@ -97,10 +88,134 @@ public class TeamController extends Controller {
         return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
     }
 
+    @ApiOperation(
+            nickname = "joinBrainstormingTeam",
+            value = "Join a brainstormingTeam",
+            notes = "With this method you can join a brainstormingTeam",
+            httpMethod = "PUT",
+            response = SuccessMessage.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
+            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    public Result joinBrainstormingTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
+
+        JsonNode body = request().body().asJson();
+
+        if (body == null ) {
+            return forbidden(Json.toJson(new ErrorMessage("Error", "json body is null")));
+        } else if(  body.hasNonNull("username") &&
+                    body.hasNonNull("password") &&
+                    body.hasNonNull("firstname") &&
+                    body.hasNonNull("lastname")) {
+
+            Participant participant = new Participant(body.findPath("username").asText() , body.findPath("password").asText(), body.findPath("firstname").asText(), body.findPath("lastname").asText());
+            BrainstormingTeam brainstormingTeam = getBrainstormingTeam(teamIdentifier);
+
+            if (brainstormingTeam!= null && brainstormingTeam.getNrOfParticipants() > brainstormingTeam.getCurrentNrOfParticipants() && brainstormingTeam.joinTeam(participant)) {
+
+                teamCollection.updateOne(eq("identifier", teamIdentifier),combine(set("participants", brainstormingTeam.getParticipants()), inc("currentNrOfParticipants", 1)), new SingleResultCallback<UpdateResult>() {
+                    @Override
+                    public void onResult(final UpdateResult result, final Throwable t) {
+                        Logger.info(result.getModifiedCount() + " Team successfully updated");
+                    }
+                });
+
+                return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully added to the brainstormingTeam")));
+
+            } else {
+                return ok(Json.toJson(new ErrorMessage("Error", "The limit of the team size is reached or the participant is already in the brainstormingTeam or this team does not exist")));
+            }
+        }
+
+        return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
+    }
 
     @ApiOperation(
-            nickname = "getBrainstormingTeam",
-            value = "Get all brainstormingTeam",
+            nickname = "leaveBrainstormingTeam",
+            value = "Leave a brainstormingTeam",
+            notes = "With this method you can leave a brainstormingTeam",
+            httpMethod = "PUT",
+            response = SuccessMessage.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
+            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    public Result leaveBrainstormingTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
+
+        JsonNode body = request().body().asJson();
+
+        if (body == null ) {
+            return forbidden(Json.toJson(new ErrorMessage("Error", "json body is null")));
+        } else if(  body.hasNonNull("username") &&
+                    body.hasNonNull("password") &&
+                    body.hasNonNull("firstname") &&
+                    body.hasNonNull("lastname")) {
+
+            Participant participant = new Participant(body.findPath("username").asText() , body.findPath("password").asText(), body.findPath("firstname").asText(), body.findPath("lastname").asText());
+            BrainstormingTeam brainstormingTeam = getBrainstormingTeam(teamIdentifier);
+
+            if (brainstormingTeam != null && brainstormingTeam.getCurrentNrOfParticipants() > 0 && brainstormingTeam.leaveTeam(participant)) {
+
+                teamCollection.updateOne(eq("identifier", teamIdentifier),combine(set("participants", brainstormingTeam.getParticipants()), inc("currentNrOfParticipants", -1)), new SingleResultCallback<UpdateResult>() {
+                    @Override
+                    public void onResult(final UpdateResult result, final Throwable t) {
+                        Logger.info(result.getModifiedCount() + " Team successfully updated");
+                    }
+                });
+
+                return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully removed from the brainstormingTeam")));
+
+            } else {
+                return ok(Json.toJson(new ErrorMessage("Error", "There are no more participants in the brainstormingTeam or the participant has already left the brainstormingTeam or this team does not exist")));
+            }
+        }
+
+        return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
+    }
+
+    @ApiOperation(
+            nickname = "deleteBrainstormingTeam",
+            value = "Delete a brainstormingTeam",
+            notes = "With this method you can delete a brainstormingTeam",
+            httpMethod = "DELETE",
+            response = SuccessMessage.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
+            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    public Result deleteBrainstormingTeam() throws ExecutionException, InterruptedException {
+
+        JsonNode body = request().body().asJson();
+
+        if (body == null ) {
+            return forbidden(Json.toJson(new ErrorMessage("Error", "json body is null")));
+        } else if(  body.hasNonNull("identifier") &&
+                    body.hasNonNull("moderator")) {
+
+            CompletableFuture<DeleteResult> future = new CompletableFuture<>();
+
+            teamCollection.deleteOne(and(   eq("identifier", body.get("identifier").asText()),
+                                            eq("moderator.username", body.findPath("username").asText()),
+                                            eq("moderator.password", body.findPath("password").asText())), new SingleResultCallback<DeleteResult>() {
+                @Override
+                public void onResult(final DeleteResult result, final Throwable t) {
+                    Logger.info(result.getDeletedCount() + " Team successfully deleted");
+                    future.complete(result);
+                }
+            });
+
+            if (future.get().getDeletedCount() > 0){
+                return ok(Json.toJson(new SuccessMessage("Success", "Team successfully deleted")));
+            } else {
+                return ok(Json.toJson(new ErrorMessage("Error", "No Team deleted! Does the identifier exist and is moderator's username and password correct?")));
+            }
+        }
+
+        return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
+    }
+
+
+    @ApiOperation(
+            nickname = "getBrainstormingTeamForParticipant",
+            value = "Get all brainstormingTeams",
             notes = "With this method you can get all brainstormingTeams for specific participant",
             httpMethod = "GET",
             response = BrainstormingTeam.class)
@@ -111,7 +226,7 @@ public class TeamController extends Controller {
         CompletableFuture<Queue<BrainstormingTeam>> future = new CompletableFuture<>();
         Queue<BrainstormingTeam> queue = new ConcurrentLinkedQueue<>();
 
-        collection.find(eq("participants.username", participant)).forEach(
+        teamCollection.find(eq("participants.username", participant)).forEach(
                 new Block<BrainstormingTeam>() {
                     @Override
                     public void apply(final BrainstormingTeam team) {
@@ -120,7 +235,7 @@ public class TeamController extends Controller {
                 }, new SingleResultCallback<Void>() {
                     @Override
                     public void onResult(final Void result, final Throwable t) {
-                        Logger.info("Get all BrainstormTeam for participant!");
+                        Logger.info("Get all BrainstormingTeams for participant!");
                         future.complete(queue);
                     }
                 });
@@ -128,14 +243,45 @@ public class TeamController extends Controller {
         return ok(Json.toJson(future.get()));
     }
 
-    public Result requiresJwtViaFilter() {
-        Optional<VerifiedJwt> oVerifiedJwt = request().attrs().getOptional(Attrs.VERIFIED_JWT);
-        return oVerifiedJwt.map(jwt -> {
-            Logger.debug(jwt.toString());
-            return ok(Json.toJson(new SuccessMessage("Success", "access granted via filter")));
-        }).orElse(forbidden(Json.toJson(new ErrorMessage("Error","eh, no verified jwt found"))));
+    @ApiOperation(
+            nickname = "getBrainstormingTeam",
+            value = "Get a brainstormingTeam",
+            notes = "With this method you can get a brainstormingTeam by its identifier",
+            httpMethod = "GET",
+            response = BrainstormingTeam.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = BrainstormingTeam.class),
+            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    public Result getBrainstormingTeamByIdentifier(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
+        BrainstormingTeam team = getBrainstormingTeam(teamIdentifier);
+
+        if (team != null) {
+            return ok(Json.toJson(team));
+        } else {
+            return ok(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam found")));
+        }
     }
 
+    public BrainstormingTeam getBrainstormingTeam(String teamIdentifier) throws ExecutionException, InterruptedException {
+        CompletableFuture<BrainstormingTeam> future = new CompletableFuture<>();
 
+        teamCollection.find(eq("identifier", teamIdentifier)).first(new SingleResultCallback<BrainstormingTeam>() {
+            @Override
+            public void onResult(BrainstormingTeam team, Throwable t) {
+                if (team != null) {
+                    Logger.info("Found brainstormingTeam");
+                    future.complete(team);
+                } else {
+                    future.complete(null);
+                }
+            }
+        });
+
+        if (future.get() != null) {
+            return future.get();
+        } else {
+            return null;
+        }
+    }
 
 }
