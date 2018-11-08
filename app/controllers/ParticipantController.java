@@ -183,7 +183,7 @@ public class ParticipantController extends Controller {
             if (future.get().getDeletedCount() > 0){
                 return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully deleted")));
             } else {
-                return ok(Json.toJson(new ErrorMessage("Error", "No Participant deleted! Is username and password correct?")));
+                return internalServerError(Json.toJson(new ErrorMessage("Error", "No Participant deleted! Is username and password correct?")));
             }
 
         }
