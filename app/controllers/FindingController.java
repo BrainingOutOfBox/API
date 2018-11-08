@@ -177,7 +177,7 @@ public class FindingController extends Controller {
                 body.get("problemDescription").asText(),
                 body.get("nrOfIdeas").asInt(),
                 body.get("baseRoundTime").asInt(),
-                1,
+                0,
                 "",
                 brainsheets,
                 team.getIdentifier());

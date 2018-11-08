@@ -60,8 +60,6 @@ public class TimerController extends Controller {
     public Result calculateRemainingTimeOfFindingFromTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier, @ApiParam(value = "BrainstormingFinding Identifier", name = "findingIdentifier", required = true) String findingIdentifier) throws ExecutionException, InterruptedException {
 
         CompletableFuture<BrainstormingFinding> future = new CompletableFuture<>();
-        DateTime currentRoundEndTime;
-        DateTime nowDate;
 
         collection.find(and(eq("brainstormingTeam", teamIdentifier),eq("identifier", findingIdentifier))).first(new SingleResultCallback<BrainstormingFinding>() {
             @Override
@@ -72,9 +70,10 @@ public class TimerController extends Controller {
         });
 
         long difference = 0;
-        currentRoundEndTime = DateTime.parse(future.get().getCurrentRoundEndTime());
-        if (currentRoundEndTime != null) {
-            nowDate = new DateTime();
+        String time = future.get().getCurrentRoundEndTime();
+        if (!time.isEmpty()) {
+            DateTime currentRoundEndTime = DateTime.parse(time);
+            DateTime nowDate = new DateTime();
             difference = getDateDiff(currentRoundEndTime, nowDate, TimeUnit.MILLISECONDS);
         }
         return ok(Json.toJson(difference));
