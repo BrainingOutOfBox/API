@@ -35,6 +35,11 @@ GET     /Finding/:teamIdentifier/getBrainstormingFindings           controllers.
 POST    /Finding/:teamIdentifier/createBrainstormingFinding         controllers.FindingController.createBrainstormingFindingForTeam(teamIdentifier)
 
 + noJwtFilter
+GET     /Finding/:findingIdentifier/getBrainstormingFinding         controllers.FindingController.getBrainstormingFinding(findingIdentifier)
+
+
+
++ noJwtFilter
 GET     /Finding/:teamIdentifier/:findingIdentifier/remainingTime   controllers.TimerController.calculateRemainingTimeOfFindingFromTeam(teamIdentifier, findingIdentifier)
 
 # swagger routes
