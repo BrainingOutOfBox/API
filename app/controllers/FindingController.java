@@ -80,7 +80,7 @@ public class FindingController extends Controller {
                     }
                 });
             } else {
-                return ok(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam with this identifier found")));
+                return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam with this identifier found")));
             }
 
         return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingFinding successfully inserted")));
@@ -91,9 +91,9 @@ public class FindingController extends Controller {
 
 
     @ApiOperation(
-            nickname = "getBrainstormingFinding",
-            value = "Get all brainstormingFinding",
-            notes = "With this method you can get all brainstormingFinding from a specific team",
+            nickname = "getBrainstormingFindings",
+            value = "Get all brainstormingFindings",
+            notes = "With this method you can get all brainstormingFindings from a specific team",
             httpMethod = "GET",
             response = BrainstormingFinding.class)
     @ApiResponses(value = {
@@ -113,12 +113,42 @@ public class FindingController extends Controller {
             }, new SingleResultCallback<Void>() {
                 @Override
                 public void onResult(final Void result, final Throwable t) {
-                    Logger.info("Get all BrainstormFinding for team!");
+                    Logger.info("Get all BrainstormFindings for team!");
                     future.complete(queue);
                 }
             });
 
         return ok(Json.toJson(future.get()));
+    }
+
+    @ApiOperation(
+            nickname = "getBrainstormingFinding",
+            value = "Get brainstormingFinding",
+            notes = "With this method you can get a brainstormingFinding by its identifier",
+            httpMethod = "GET",
+            response = BrainstormingFinding.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = BrainstormingFinding.class),
+            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    public Result getBrainstormingFinding(@ApiParam(value = "BrainstormingFinding Identifier", name = "findingIdentifier", required = true) String findingIdentifier) throws ExecutionException, InterruptedException {
+
+        CompletableFuture<BrainstormingFinding> future = new CompletableFuture<>();
+
+        findingCollection.find(eq("identifier", findingIdentifier)).first(new SingleResultCallback<BrainstormingFinding>() {
+            @Override
+            public void onResult(BrainstormingFinding result, Throwable t) {
+                Logger.info("Get BrainstormFinding by identifier!");
+                future.complete(result);
+            }
+        });
+
+        BrainstormingFinding finding = future.get();
+
+        if (finding != null) {
+            return ok(Json.toJson(finding));
+        } else {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found")));
+        }
     }
 
     private BrainstormingFinding createBrainstormingFinding(JsonNode body, BrainstormingTeam team) {
@@ -148,7 +178,7 @@ public class FindingController extends Controller {
                 body.get("nrOfIdeas").asInt(),
                 body.get("baseRoundTime").asInt(),
                 1,
-                new DateTime().plusMinutes(body.get("baseRoundTime").asInt()).toString(),
+                "",
                 brainsheets,
                 team.getIdentifier());
 
