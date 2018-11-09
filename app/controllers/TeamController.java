@@ -123,7 +123,7 @@ public class TeamController extends Controller {
                 return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully added to the brainstormingTeam")));
 
             } else {
-                return ok(Json.toJson(new ErrorMessage("Error", "The limit of the team size is reached or the participant is already in the brainstormingTeam or this team does not exist")));
+                return internalServerError(Json.toJson(new ErrorMessage("Error", "The limit of the team size is reached or the participant is already in the brainstormingTeam or this team does not exist")));
             }
         }
 
@@ -165,7 +165,7 @@ public class TeamController extends Controller {
                 return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully removed from the brainstormingTeam")));
 
             } else {
-                return ok(Json.toJson(new ErrorMessage("Error", "There are no more participants in the brainstormingTeam or the participant has already left the brainstormingTeam or this team does not exist")));
+                return internalServerError(Json.toJson(new ErrorMessage("Error", "There are no more participants in the brainstormingTeam or the participant has already left the brainstormingTeam or this team does not exist")));
             }
         }
 
@@ -205,7 +205,7 @@ public class TeamController extends Controller {
             if (future.get().getDeletedCount() > 0){
                 return ok(Json.toJson(new SuccessMessage("Success", "Team successfully deleted")));
             } else {
-                return ok(Json.toJson(new ErrorMessage("Error", "No Team deleted! Does the identifier exist and is moderator's username and password correct?")));
+                return internalServerError(Json.toJson(new ErrorMessage("Error", "No Team deleted! Does the identifier exist and is moderator's username and password correct?")));
             }
         }
 
@@ -258,7 +258,7 @@ public class TeamController extends Controller {
         if (team != null) {
             return ok(Json.toJson(team));
         } else {
-            return ok(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam found")));
+            return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam found")));
         }
     }
 
@@ -277,8 +277,10 @@ public class TeamController extends Controller {
             }
         });
 
-        if (future.get() != null) {
-            return future.get();
+        BrainstormingTeam team = future.get();
+
+        if (team != null) {
+            return team;
         } else {
             return null;
         }

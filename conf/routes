@@ -8,7 +8,6 @@ GET     /                                                           controllers.
 
 + noJwtFilter
 POST    /Participant/login                                          controllers.ParticipantController.login
-
 + noJwtFilter
 POST    /Participant/register                                       controllers.ParticipantController.createParticipant
 + noJwtFilter
@@ -27,15 +26,28 @@ PUT     /Team/:teamIdentifier/joinTeam                              controllers.
 + noJwtFilter
 PUT     /Team/:teamIdentifier/leaveTeam                             controllers.TeamController.leaveBrainstormingTeam(teamIdentifier)
 + noJwtFilter
-GET     /Team/:teamIdentifier                                       controllers.TeamController.getBrainstormingTeamByIdentifier(teamIdentifier)
+GET     /Team/:teamIdentifier/getBrainstormingTeam                  controllers.TeamController.getBrainstormingTeamByIdentifier(teamIdentifier)
 
 + noJwtFilter
 GET     /Finding/:teamIdentifier/getBrainstormingFindings           controllers.FindingController.getBrainstormingFindingFromTeam(teamIdentifier)
 + noJwtFilter
 POST    /Finding/:teamIdentifier/createBrainstormingFinding         controllers.FindingController.createBrainstormingFindingForTeam(teamIdentifier)
++ noJwtFilter
+GET     /Finding/:findingIdentifier/getBrainstormingFinding         controllers.FindingController.getBrainstormingFindingByIdentifier(findingIdentifier)
++ noJwtFilter
+PUT     /Finding/:findingIdentifier/putBrainsheet                   controllers.FindingController.putBrainsheet(findingIdentifier)
++ noJwtFilter
+GET     /Finding/:findingIdentifier/startBrainstorming              controllers.FindingController.startBrainstorming(findingIdentifier)
+
 
 + noJwtFilter
 GET     /Finding/:teamIdentifier/:findingIdentifier/remainingTime   controllers.TimerController.calculateRemainingTimeOfFindingFromTeam(teamIdentifier, findingIdentifier)
+
+
+
+
+
+
 
 # swagger routes
 + noJwtFilter
