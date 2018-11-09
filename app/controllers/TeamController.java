@@ -82,7 +82,7 @@ public class TeamController extends Controller {
                 }
             });
 
-            return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingTeam successfully inserted")));
+            return ok(Json.toJson(new SuccessMessage("Success", team.getIdentifier())));
         }
 
         return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
