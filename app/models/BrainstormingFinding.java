@@ -16,13 +16,14 @@ public class BrainstormingFinding {
     private int currentRound;
     private String currentRoundEndTime;
     private ArrayList<Brainsheet> brainsheets;
+    private int deliveredBrainsheetsInCurrentRound;
     private String brainstormingTeam;
 
     public BrainstormingFinding(){
 
     }
 
-    public BrainstormingFinding(String name, String problemDescription, int nrOfIdeas, int baseRoundTime, int currentRound, String currentRoundEndTime, ArrayList<Brainsheet> brainsheets, String brainstormingTeam) {
+    public BrainstormingFinding(String name, String problemDescription, int nrOfIdeas, int baseRoundTime, int currentRound, String currentRoundEndTime, ArrayList<Brainsheet> brainsheets, int deliveredBrainsheetsInCurrentRound, String brainstormingTeam) {
         this.identifier = UUID.randomUUID().toString();
         this.name = name;
         this.problemDescription = problemDescription;
@@ -31,6 +32,7 @@ public class BrainstormingFinding {
         this.currentRound = currentRound;
         this.currentRoundEndTime = currentRoundEndTime;
         this.brainsheets = brainsheets;
+        this.deliveredBrainsheetsInCurrentRound = deliveredBrainsheetsInCurrentRound;
         this.brainstormingTeam = brainstormingTeam;
     }
 
@@ -104,6 +106,14 @@ public class BrainstormingFinding {
 
     public void setBrainsheets(ArrayList<Brainsheet> brainsheets) {
         this.brainsheets = brainsheets;
+    }
+
+    public int getDeliveredBrainsheetsInCurrentRound() {
+        return deliveredBrainsheetsInCurrentRound;
+    }
+
+    public void setDeliveredBrainsheetsInCurrentRound(int deliveredBrainsheetsInCurrentRound) {
+        this.deliveredBrainsheetsInCurrentRound = deliveredBrainsheetsInCurrentRound;
     }
 
     public String getBrainstormingTeam() {
