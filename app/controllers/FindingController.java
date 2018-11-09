@@ -76,8 +76,9 @@ public class FindingController extends Controller {
 
             TeamController teamController = new TeamController();
             BrainstormingTeam team = teamController.getBrainstormingTeam(teamIdentifier);
+            BrainstormingFinding finding;
             if (team != null) {
-                BrainstormingFinding finding = createBrainstormingFinding(body, team);
+                finding = createBrainstormingFinding(body, team);
 
                 findingCollection.insertOne(finding, new SingleResultCallback<Void>() {
                     @Override
@@ -89,7 +90,7 @@ public class FindingController extends Controller {
                 return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam with this identifier found")));
             }
 
-        return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingFinding successfully inserted")));
+        return ok(Json.toJson(new SuccessMessage("Success", finding.getIdentifier())));
         }
 
         return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
