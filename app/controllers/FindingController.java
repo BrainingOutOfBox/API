@@ -26,13 +26,8 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
+import java.util.*;
+import java.util.concurrent.*;
 
 
 @Api(value = "/BrainstormingFinding", description = "All operations with brainstormingFindings", produces = "application/json")
@@ -185,7 +180,7 @@ public class FindingController extends Controller {
                 }
             });
 
-            findingCollection.updateOne(eq("identifier", findingIdentifier),pushEach("brainsheets", Arrays.asList(newBrainsheet), new PushOptions().position(newBrainsheet.getNrOfSheet())), new SingleResultCallback<UpdateResult>() {
+            findingCollection.updateOne(eq("identifier", findingIdentifier),combine(pushEach("brainsheets", Arrays.asList(newBrainsheet), new PushOptions().position(newBrainsheet.getNrOfSheet())), inc("deliveredBrainsheetsInCurrentRound", 1)), new SingleResultCallback<UpdateResult>() {
                 @Override
                 public void onResult(final UpdateResult result, final Throwable t) {
                     Logger.info(result.getModifiedCount() + " Brainsheet successfully inserted");
@@ -208,7 +203,48 @@ public class FindingController extends Controller {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     public Result startBrainstorming(String findingIdentifer) throws ExecutionException, InterruptedException {
+        startWatcherForBrainstormingFinding(findingIdentifer);
         return nextRound(findingIdentifer);
+    }
+
+    private void startWatcherForBrainstormingFinding(String identifier){
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    BrainstormingFinding finding = getBrainstormingFinding(identifier);
+                    DateTime endDateTime = DateTime.parse(finding.getCurrentRoundEndTime());
+                    /*
+                    System.out.println("Task started for " + finding.getIdentifier());
+                    System.out.println(finding.getIdentifier() + "_Delivered Sheets: " + finding.getDeliveredBrainsheetsInCurrentRound());
+                    System.out.println(finding.getIdentifier() + "_End Time " + finding.getCurrentRoundEndTime());
+                    System.out.println(finding.getIdentifier() + "_Currend Round: " + finding.getCurrentRound());
+                    */
+                    if (finding.getCurrentRound() > finding.getBrainsheets().size()){
+                        //System.out.println("shutdown");
+                        lastRound(identifier);
+                        executor.shutdown();
+                    }
+
+                    if (endDateTime.plusSeconds(30).isBeforeNow() ||
+                        finding.getDeliveredBrainsheetsInCurrentRound() >= finding.getBrainsheets().size()){
+                        //System.out.println("next Round");
+                        nextRound(identifier);
+                    }
+
+                    //System.out.println("cancel");
+                    cancel();
+
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        executor.scheduleAtFixedRate(task, 1000L, 5000L, TimeUnit.MILLISECONDS);
     }
 
     private Result nextRound(String findingIdentifier) throws ExecutionException, InterruptedException {
@@ -216,7 +252,25 @@ public class FindingController extends Controller {
 
         if (finding != null) {
 
-            findingCollection.updateOne(eq("identifier", findingIdentifier), combine(set("currentRoundEndTime", new DateTime().plusMinutes(finding.getBaseRoundTime()).toString()), inc("currentRound", 1)), new SingleResultCallback<UpdateResult>() {
+            findingCollection.updateOne(eq("identifier", findingIdentifier), combine(set("currentRoundEndTime", new DateTime().plusMinutes(finding.getBaseRoundTime()).toString()), inc("currentRound", 1), set("deliveredBrainsheetsInCurrentRound", 0)), new SingleResultCallback<UpdateResult>() {
+                @Override
+                public void onResult(final UpdateResult result, final Throwable t) {
+                    Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated");
+                }
+            });
+
+            return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingFinding successfully updated")));
+        }
+
+        return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found")));
+    }
+
+    private Result lastRound(String findingIdentifier) throws ExecutionException, InterruptedException {
+        BrainstormingFinding finding = getBrainstormingFinding(findingIdentifier);
+
+        if (finding != null) {
+
+            findingCollection.updateOne(eq("identifier", findingIdentifier), set("currentRound", -1), new SingleResultCallback<UpdateResult>() {
                 @Override
                 public void onResult(final UpdateResult result, final Throwable t) {
                     Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated");
@@ -296,6 +350,7 @@ public class FindingController extends Controller {
                 0,
                 "",
                 brainsheets,
+                0,
                 team.getIdentifier());
 
         return finding;
