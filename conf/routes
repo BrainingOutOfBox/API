@@ -26,7 +26,7 @@ PUT     /Team/:teamIdentifier/joinTeam                              controllers.
 + noJwtFilter
 PUT     /Team/:teamIdentifier/leaveTeam                             controllers.TeamController.leaveBrainstormingTeam(teamIdentifier)
 + noJwtFilter
-GET     /Team/:teamIdentifier                                       controllers.TeamController.getBrainstormingTeamByIdentifier(teamIdentifier)
+GET     /Team/:teamIdentifier/getBrainstormingTeam                  controllers.TeamController.getBrainstormingTeamByIdentifier(teamIdentifier)
 
 + noJwtFilter
 GET     /Finding/:teamIdentifier/getBrainstormingFindings           controllers.FindingController.getBrainstormingFindingFromTeam(teamIdentifier)
