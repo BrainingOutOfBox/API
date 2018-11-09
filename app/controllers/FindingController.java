@@ -83,7 +83,7 @@ public class FindingController extends Controller {
                 findingCollection.insertOne(finding, new SingleResultCallback<Void>() {
                     @Override
                     public void onResult(Void result, Throwable t) {
-                        Logger.info("Inserted BrainstormFinding!");
+                        Logger.info("Inserted BrainstormFinding");
                     }
                 });
             } else {
@@ -120,7 +120,7 @@ public class FindingController extends Controller {
             }, new SingleResultCallback<Void>() {
                 @Override
                 public void onResult(final Void result, final Throwable t) {
-                    Logger.info("Get all BrainstormFindings for team!");
+                    Logger.info("Get all BrainstormFindings for team");
                     future.complete(queue);
                 }
             });
@@ -236,7 +236,7 @@ public class FindingController extends Controller {
         findingCollection.find(eq("identifier", findingIdentifier)).first(new SingleResultCallback<BrainstormingFinding>() {
             @Override
             public void onResult(BrainstormingFinding result, Throwable t) {
-                Logger.info("Get BrainstormingFinding by identifier!");
+                Logger.info("Get BrainstormingFinding by identifier");
                 future.complete(result);
             }
         });
