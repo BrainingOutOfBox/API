@@ -149,7 +149,7 @@ public class FindingController extends Controller {
 
     @ApiOperation(
             nickname = "putBrainsheet",
-            value = "Put brainsheet",
+            value = "Put a updated brainsheet",
             notes = "With this method you can update the brainsheets from a brainstormingFinding",
             httpMethod = "PUT",
             response = SuccessMessage.class)
@@ -197,6 +197,37 @@ public class FindingController extends Controller {
         return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
     }
 
+    @ApiOperation(
+            nickname = "startBrainstormingFinding",
+            value = "start a brainstormingFinding",
+            notes = "With this method you can start the brainstormingFinding",
+            httpMethod = "PUT",
+            response = SuccessMessage.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
+            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    public Result startBrainstorming(String findingIdentifer) throws ExecutionException, InterruptedException {
+        return nextRound(findingIdentifer);
+    }
+
+    private Result nextRound(String findingIdentifier) throws ExecutionException, InterruptedException {
+        BrainstormingFinding finding = getBrainstormingFinding(findingIdentifier);
+
+        if (finding != null) {
+
+            findingCollection.updateOne(eq("identifier", findingIdentifier), combine(set("currentRoundEndTime", new DateTime().plusMinutes(finding.getBaseRoundTime()).toString()), inc("currentRound", 1)), new SingleResultCallback<UpdateResult>() {
+                @Override
+                public void onResult(final UpdateResult result, final Throwable t) {
+                    Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated");
+                }
+            });
+
+            return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingFinding successfully updated")));
+        }
+
+        return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found")));
+    }
+
     private BrainstormingFinding getBrainstormingFinding(String findingIdentifier) throws ExecutionException, InterruptedException {
 
         CompletableFuture<BrainstormingFinding> future = new CompletableFuture<>();
@@ -204,7 +235,7 @@ public class FindingController extends Controller {
         findingCollection.find(eq("identifier", findingIdentifier)).first(new SingleResultCallback<BrainstormingFinding>() {
             @Override
             public void onResult(BrainstormingFinding result, Throwable t) {
-                Logger.info("Get BrainstormFinding by identifier!");
+                Logger.info("Get BrainstormingFinding by identifier!");
                 future.complete(result);
             }
         });

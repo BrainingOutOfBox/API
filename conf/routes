@@ -36,6 +36,8 @@ POST    /Finding/:teamIdentifier/createBrainstormingFinding         controllers.
 GET     /Finding/:findingIdentifier/getBrainstormingFinding         controllers.FindingController.getBrainstormingFindingByIdentifier(findingIdentifier)
 + noJwtFilter
 PUT     /Finding/:findingIdentifier/putBrainsheet                   controllers.FindingController.putBrainsheet(findingIdentifier)
++ noJwtFilter
+GET     /Finding/:findingIdentifier/startBrainstorming              controllers.FindingController.startBrainstorming(findingIdentifier)
 
 
 + noJwtFilter
