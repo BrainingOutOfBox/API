@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public final class Brainwave {
     private int nrOfBrainwave;
-    ArrayList<Idea> ideas;
+    ArrayList<Idea> ideas = new ArrayList<>();
 
     public Brainwave() {
 
@@ -29,5 +29,9 @@ public final class Brainwave {
 
     public void setIdeas(ArrayList<Idea> ideas) {
         this.ideas = ideas;
+    }
+
+    public void addIdea(Idea idea){
+        this.ideas.add(idea);
     }
 }
