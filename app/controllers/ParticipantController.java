@@ -16,8 +16,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import jwt.VerifiedJwt;
-import jwt.filter.Attrs;
 import models.ErrorMessage;
 import models.Participant;
 import models.SuccessMessage;
@@ -33,7 +31,6 @@ import java.io.UnsupportedEncodingException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -100,7 +97,8 @@ public class ParticipantController extends Controller {
             if (future.get()!= null){
                 ObjectNode result = Json.newObject();
                 result.putPOJO("participant", future.get());
-                result.put("access_token", getSignedToken(7l));
+                result.put("jwt_token", getSignedToken(7l));
+                //result.put("csrf_token", CSRF.getToken(request()).map(CSRF.Token::value).orElse("no token"));
                 return ok(result);
             } else {
                 Logger.info("username or password not correct");
@@ -215,13 +213,5 @@ public class ParticipantController extends Controller {
             }
         });
         return future.get();
-    }
-
-    public Result requiresJwtViaFilter() {
-        Optional<VerifiedJwt> oVerifiedJwt = request().attrs().getOptional(Attrs.VERIFIED_JWT);
-        return oVerifiedJwt.map(jwt -> {
-            Logger.debug(jwt.toString());
-            return ok(Json.toJson(new SuccessMessage("Success", "access granted via filter")));
-        }).orElse(forbidden(Json.toJson(new ErrorMessage("Error","eh, no verified jwt found"))));
     }
 }

@@ -10,37 +10,23 @@ GET     /                                                           controllers.
 POST    /Participant/login                                          controllers.ParticipantController.login
 + noJwtFilter
 POST    /Participant/register                                       controllers.ParticipantController.createParticipant
-+ noJwtFilter
 DELETE  /Participant/deleteAccount                                  controllers.ParticipantController.deleteParticipant
 
-GET     /Participant/requires-jwt-via-filter                        controllers.ParticipantController.requiresJwtViaFilter
 
-+ noJwtFilter
 POST    /Team/createBrainstormingTeam                               controllers.TeamController.createBrainstormingTeam
-+ noJwtFilter
 DELETE  /Team/deleteBrainstormingTeam                               controllers.TeamController.deleteBrainstormingTeam
-+ noJwtFilter
 GET     /Team/:participant/getMyBrainstormingTeams                  controllers.TeamController.getBrainstormingTeamForParticipant(participant)
-+ noJwtFilter
 PUT     /Team/:teamIdentifier/joinTeam                              controllers.TeamController.joinBrainstormingTeam(teamIdentifier)
-+ noJwtFilter
 PUT     /Team/:teamIdentifier/leaveTeam                             controllers.TeamController.leaveBrainstormingTeam(teamIdentifier)
-+ noJwtFilter
 GET     /Team/:teamIdentifier/getBrainstormingTeam                  controllers.TeamController.getBrainstormingTeamByIdentifier(teamIdentifier)
 
-+ noJwtFilter
 GET     /Finding/:teamIdentifier/getBrainstormingFindings           controllers.FindingController.getBrainstormingFindingFromTeam(teamIdentifier)
-+ noJwtFilter
 POST    /Finding/:teamIdentifier/createBrainstormingFinding         controllers.FindingController.createBrainstormingFindingForTeam(teamIdentifier)
-+ noJwtFilter
 GET     /Finding/:findingIdentifier/getBrainstormingFinding         controllers.FindingController.getBrainstormingFindingByIdentifier(findingIdentifier)
-+ noJwtFilter
 PUT     /Finding/:findingIdentifier/putBrainsheet                   controllers.FindingController.putBrainsheet(findingIdentifier)
-+ noJwtFilter
 GET     /Finding/:findingIdentifier/startBrainstorming              controllers.FindingController.startBrainstorming(findingIdentifier)
 
 
-+ noJwtFilter
 GET     /Finding/:teamIdentifier/:findingIdentifier/remainingTime   controllers.TimerController.calculateRemainingTimeOfFindingFromTeam(teamIdentifier, findingIdentifier)
 
 
