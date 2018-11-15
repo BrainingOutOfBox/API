@@ -123,7 +123,7 @@ public class ParticipantController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result createParticipant(){
+    public Result createParticipant() throws ExecutionException, InterruptedException {
 
         JsonNode body = request().body().asJson();
 
@@ -133,6 +133,10 @@ public class ParticipantController extends Controller {
                 body.hasNonNull("password") &&
                 body.hasNonNull("firstname") &&
                 body.hasNonNull("lastname")) {
+
+            if (ckeckDuplicateUsername(body.get("username").asText()) > 0){
+                return internalServerError(Json.toJson(new ErrorMessage("Error", "username is already taken")));
+            }
 
             Participant participant = new Participant(body.get("username").asText(), body.get("password").asText(), body.get("firstname").asText(), body.get("lastname").asText());
 
@@ -200,6 +204,17 @@ public class ParticipantController extends Controller {
                 .withClaim("user_id", userId)
                 .withExpiresAt(Date.from(ZonedDateTime.now(ZoneId.systemDefault()).plusMinutes(120).toInstant()))
                 .sign(algorithm);
+    }
+
+    private Long ckeckDuplicateUsername(String username) throws ExecutionException, InterruptedException {
+        CompletableFuture<Long> future = new CompletableFuture<>();
+        participantCollection.countDocuments(eq("username", username), new SingleResultCallback<Long>() {
+            @Override
+            public void onResult(Long result, Throwable t) {
+                future.complete(result);
+            }
+        });
+        return future.get();
     }
 
     public Result requiresJwtViaFilter() {
