@@ -16,6 +16,7 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.PushOptions;
 import com.mongodb.client.result.UpdateResult;
+import config.DBEngineProvider;
 import io.swagger.annotations.*;
 import models.*;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -26,6 +27,7 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 
+import javax.inject.Inject;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -33,20 +35,14 @@ import java.util.concurrent.*;
 @Api(value = "/BrainstormingFinding", description = "All operations with brainstormingFindings", produces = "application/json")
 public class FindingController extends Controller {
 
-    private MongoClient mongoClient;
-    private MongoDatabase database;
-    CodecRegistry pojoCodecRegistry;
+    private DBEngineProvider mongoDBProvider;
+
     MongoCollection<BrainstormingFinding> findingCollection;
 
-
-    public FindingController(){
-        pojoCodecRegistry = fromRegistries(MongoClients.getDefaultCodecRegistry(), fromProviders(PojoCodecProvider.builder().automatic(true).build()));
-        mongoClient = MongoClients.create(new ConnectionString("mongodb://play:Methode746@localhost:40002/?authSource=admin&authMechanism=SCRAM-SHA-1"));
-
-        database = mongoClient.getDatabase("Test");
-        database = database.withCodecRegistry(pojoCodecRegistry);
-
-        findingCollection = database.getCollection("BrainstormingFinding", BrainstormingFinding.class);
+    @Inject
+    public FindingController(DBEngineProvider dbEngineProvider){
+        this.mongoDBProvider = dbEngineProvider;
+        findingCollection = mongoDBProvider.getDatabase().getCollection("BrainstormingFinding", BrainstormingFinding.class);
     }
 
     @ApiOperation(
@@ -69,7 +65,7 @@ public class FindingController extends Controller {
                     body.hasNonNull("nrOfIdeas") &&
                     body.hasNonNull("baseRoundTime")) {
 
-            TeamController teamController = new TeamController();
+            TeamController teamController = new TeamController(mongoDBProvider);
             BrainstormingTeam team = teamController.getBrainstormingTeam(teamIdentifier);
             BrainstormingFinding finding;
             if (team != null) {
@@ -259,7 +255,7 @@ public class FindingController extends Controller {
         findingCollection.updateOne(eq("identifier", finding.getIdentifier()), combine(set("currentRoundEndTime", new DateTime().plusMinutes(finding.getBaseRoundTime()).toString()), inc("currentRound", 1), set("deliveredBrainsheetsInCurrentRound", 0)), new SingleResultCallback<UpdateResult>() {
             @Override
             public void onResult(final UpdateResult result, final Throwable t) {
-                Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated");
+                //Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated");
             }
         });
 
@@ -272,7 +268,7 @@ public class FindingController extends Controller {
         findingCollection.updateOne(eq("identifier", finding.getIdentifier()), set("currentRound", -1), new SingleResultCallback<UpdateResult>() {
             @Override
             public void onResult(final UpdateResult result, final Throwable t) {
-                Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated");
+                //Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated");
             }
         });
 

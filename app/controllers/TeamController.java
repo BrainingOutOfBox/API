@@ -11,6 +11,7 @@ import com.mongodb.async.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
+import config.DBEngineProvider;
 import io.swagger.annotations.*;
 import models.*;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -19,6 +20,7 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.*;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -34,20 +36,14 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 @Api(value = "/Team", description = "All operations with team", produces = "application/json")
 public class TeamController extends Controller {
 
-    private MongoClient mongoClient;
-    private MongoDatabase database;
-    CodecRegistry pojoCodecRegistry;
+    private DBEngineProvider mongoDBProvider;
+
     MongoCollection<BrainstormingTeam> teamCollection;
 
-    public TeamController(){
-        pojoCodecRegistry = fromRegistries(MongoClients.getDefaultCodecRegistry(), fromProviders(PojoCodecProvider.builder().automatic(true).build()));
-        mongoClient = MongoClients.create(new ConnectionString("mongodb://play:Methode746@localhost:40002/?authSource=admin&authMechanism=SCRAM-SHA-1"));
-
-        database = mongoClient.getDatabase("Test");
-        database = database.withCodecRegistry(pojoCodecRegistry);
-
-        teamCollection = database.getCollection("BrainstormingTeam", BrainstormingTeam.class);
-
+    @Inject
+    public TeamController(DBEngineProvider dbEngineProvider){
+        this.mongoDBProvider = dbEngineProvider;
+        teamCollection = mongoDBProvider.getDatabase().getCollection("BrainstormingTeam", BrainstormingTeam.class);
     }
 
     @ApiOperation(

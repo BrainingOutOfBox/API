@@ -12,6 +12,7 @@ import com.mongodb.async.client.MongoCollection;
 import com.mongodb.async.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
 import com.typesafe.config.Config;
+import config.DBEngineProvider;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -43,30 +44,15 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 public class ParticipantController extends Controller {
 
     private Config config;
+    private DBEngineProvider mongoDBProvider;
 
-    private MongoClient mongoClient;
-    private MongoDatabase database;
-    CodecRegistry pojoCodecRegistry;
     MongoCollection<Participant> participantCollection;
 
     @Inject
-    public ParticipantController(Config config){
+    public ParticipantController(Config config, DBEngineProvider dbEngineProvider){
         this.config = config;
-
-        String url  = config.getString("db.mongo.url");
-        int port = config.getInt("db.mongo.port");
-        String user = config.getString("db.mongo.username");
-        String password = config.getString("db.mongo.password");
-        String db = config.getString("db.mongo.database");
-
-        pojoCodecRegistry = fromRegistries(MongoClients.getDefaultCodecRegistry(), fromProviders(PojoCodecProvider.builder().automatic(true).build()));
-        mongoClient = MongoClients.create(new ConnectionString("mongodb://"+user+":"+password+"@"+url+":"+port+"/?authSource=admin&authMechanism=SCRAM-SHA-1"));
-
-        database = mongoClient.getDatabase(db);
-        database = database.withCodecRegistry(pojoCodecRegistry);
-
-        participantCollection = database.getCollection("Participant", Participant.class);
-
+        this.mongoDBProvider = dbEngineProvider;
+        participantCollection = mongoDBProvider.getDatabase().getCollection("Participant", Participant.class);
     }
 
     @ApiOperation(
