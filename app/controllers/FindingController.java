@@ -255,7 +255,7 @@ public class FindingController extends Controller {
         findingCollection.updateOne(eq("identifier", finding.getIdentifier()), combine(set("currentRoundEndTime", new DateTime().plusMinutes(finding.getBaseRoundTime()).toString()), inc("currentRound", 1), set("deliveredBrainsheetsInCurrentRound", 0)), new SingleResultCallback<UpdateResult>() {
             @Override
             public void onResult(final UpdateResult result, final Throwable t) {
-                //Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated");
+                Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated");
             }
         });
 
@@ -268,7 +268,7 @@ public class FindingController extends Controller {
         findingCollection.updateOne(eq("identifier", finding.getIdentifier()), set("currentRound", -1), new SingleResultCallback<UpdateResult>() {
             @Override
             public void onResult(final UpdateResult result, final Throwable t) {
-                //Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated");
+                Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated");
             }
         });
 
