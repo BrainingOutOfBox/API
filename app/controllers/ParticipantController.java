@@ -42,7 +42,6 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 @Api(value = "/Participant", description = "All operations with participant", produces = "application/json")
 public class ParticipantController extends Controller {
 
-    @Inject
     private Config config;
 
     private MongoClient mongoClient;
@@ -50,11 +49,20 @@ public class ParticipantController extends Controller {
     CodecRegistry pojoCodecRegistry;
     MongoCollection<Participant> participantCollection;
 
-    public ParticipantController(){
-        pojoCodecRegistry = fromRegistries(MongoClients.getDefaultCodecRegistry(), fromProviders(PojoCodecProvider.builder().automatic(true).build()));
-        mongoClient = MongoClients.create(new ConnectionString("mongodb://play:Methode746@localhost:40002/?authSource=admin&authMechanism=SCRAM-SHA-1"));
+    @Inject
+    public ParticipantController(Config config){
+        this.config = config;
 
-        database = mongoClient.getDatabase("Test");
+        String url  = config.getString("db.mongo.url");
+        int port = config.getInt("db.mongo.port");
+        String user = config.getString("db.mongo.username");
+        String password = config.getString("db.mongo.password");
+        String db = config.getString("db.mongo.database");
+
+        pojoCodecRegistry = fromRegistries(MongoClients.getDefaultCodecRegistry(), fromProviders(PojoCodecProvider.builder().automatic(true).build()));
+        mongoClient = MongoClients.create(new ConnectionString("mongodb://"+user+":"+password+"@"+url+":"+port+"/?authSource=admin&authMechanism=SCRAM-SHA-1"));
+
+        database = mongoClient.getDatabase(db);
         database = database.withCodecRegistry(pojoCodecRegistry);
 
         participantCollection = database.getCollection("Participant", Participant.class);
