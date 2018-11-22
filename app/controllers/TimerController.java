@@ -63,16 +63,21 @@ public class TimerController extends Controller {
 
         collection.find(and(eq("brainstormingTeam", teamIdentifier),eq("identifier", findingIdentifier))).first(new SingleResultCallback<BrainstormingFinding>() {
             @Override
-            public void onResult(final BrainstormingFinding brainstormFinding, final Throwable t) {
-                Logger.info(brainstormFinding.getCurrentRoundEndTime());
-                future.complete(brainstormFinding);
+            public void onResult(final BrainstormingFinding brainstormingFinding, final Throwable t) {
+                if (brainstormingFinding != null) {
+                    Logger.info("Found brainstormingFinding for calculation");
+                    future.complete(brainstormingFinding);
+                } else {
+                    Logger.info("No brainstormingFinding found for calculation");
+                    future.complete(null);
+                }
             }
         });
 
         long difference = 0;
-        String time = future.get().getCurrentRoundEndTime();
-        if (!time.isEmpty()) {
-            DateTime currentRoundEndTime = DateTime.parse(time);
+        BrainstormingFinding finding = future.get();
+        if (finding != null && !finding.getCurrentRoundEndTime().isEmpty()) {
+            DateTime currentRoundEndTime = DateTime.parse(finding.getCurrentRoundEndTime());
             DateTime nowDate = new DateTime();
             difference = getDateDiff(currentRoundEndTime, nowDate, TimeUnit.MILLISECONDS);
         }
