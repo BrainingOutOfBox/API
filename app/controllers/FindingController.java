@@ -233,8 +233,8 @@ public class FindingController extends Controller {
 
                         if (finding.getCurrentRound() >= finding.getBrainsheets().size()){
                             //System.out.println("shutdown");
-                            //lastRound(finding);
-                            nextRound(finding);
+                            lastRound(finding);
+                            //nextRound(finding);
                             executor.shutdown();
                         }
 
