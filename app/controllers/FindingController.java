@@ -226,14 +226,18 @@ public class FindingController extends Controller {
                     System.out.println(finding.getIdentifier() + "_End Time " + finding.getCurrentRoundEndTime());
                     System.out.println(finding.getIdentifier() + "_Currend Round: " + finding.getCurrentRound());
                     */
-                    if (finding.getCurrentRound() > finding.getBrainsheets().size()){
-                        //System.out.println("shutdown");
-                        lastRound(finding);
-                        executor.shutdown();
-                    }
+
 
                     if (endDateTime.plusSeconds(30).isBeforeNow() ||
                         finding.getDeliveredBrainsheetsInCurrentRound() >= finding.getBrainsheets().size()){
+
+                        if (finding.getCurrentRound() >= finding.getBrainsheets().size()){
+                            //System.out.println("shutdown");
+                            //lastRound(finding);
+                            nextRound(finding);
+                            executor.shutdown();
+                        }
+
                         //System.out.println("next Round");
                         nextRound(finding);
                     }
@@ -255,7 +259,7 @@ public class FindingController extends Controller {
     private Result nextRound(BrainstormingFinding finding) throws ExecutionException, InterruptedException {
         if (finding != null) {
 
-            findingCollection.updateOne(eq("identifier", finding.getIdentifier()), combine(set("currentRoundEndTime", new DateTime().plusMinutes(finding.getBaseRoundTime()).toString()), inc("currentRound", 1), set("deliveredBrainsheetsInCurrentRound", 0)), new SingleResultCallback<UpdateResult>() {
+            findingCollection.updateOne(eq("identifier", finding.getIdentifier()), combine(set("currentRoundEndTime", new DateTime().plusMinutes(finding.getBaseRoundTime()+finding.getCurrentRound()).toString()), inc("currentRound", 1), set("deliveredBrainsheetsInCurrentRound", 0)), new SingleResultCallback<UpdateResult>() {
                 @Override
                 public void onResult(final UpdateResult result, final Throwable t) {
                     Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated");
