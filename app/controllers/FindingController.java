@@ -231,15 +231,14 @@ public class FindingController extends Controller {
                     if (endDateTime.plusSeconds(30).isBeforeNow() ||
                         finding.getDeliveredBrainsheetsInCurrentRound() >= finding.getBrainsheets().size()){
 
-                        if (finding.getCurrentRound() >= finding.getBrainsheets().size()){
+                        if (finding.getCurrentRound() == finding.getBrainsheets().size()){
                             //System.out.println("shutdown");
                             lastRound(finding);
-                            //nextRound(finding);
                             executor.shutdown();
+                        } else {
+                            //System.out.println("next Round");
+                            nextRound(finding);
                         }
-
-                        //System.out.println("next Round");
-                        nextRound(finding);
                     }
 
                     //System.out.println("cancel");
