@@ -15,10 +15,13 @@ import io.swagger.annotations.*;
 import models.*;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import org.bson.types.ObjectId;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.*;
+import services.MongoDBTeamService;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -34,20 +37,10 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 @Api(value = "/Team", description = "All operations with team", produces = "application/json")
 public class TeamController extends Controller {
 
-    private MongoClient mongoClient;
-    private MongoDatabase database;
-    CodecRegistry pojoCodecRegistry;
-    MongoCollection<BrainstormingTeam> teamCollection;
+    private MongoDBTeamService service;
 
-    public TeamController(){
-        pojoCodecRegistry = fromRegistries(MongoClients.getDefaultCodecRegistry(), fromProviders(PojoCodecProvider.builder().automatic(true).build()));
-        mongoClient = MongoClients.create(new ConnectionString("mongodb://play:Methode746@localhost:40002/?authSource=admin&authMechanism=SCRAM-SHA-1"));
-
-        database = mongoClient.getDatabase("Test");
-        database = database.withCodecRegistry(pojoCodecRegistry);
-
-        teamCollection = database.getCollection("BrainstormingTeam", BrainstormingTeam.class);
-
+    TeamController(){
+        service = new MongoDBTeamService();
     }
 
     @ApiOperation(
@@ -75,12 +68,7 @@ public class TeamController extends Controller {
             participants.add(moderator);
             BrainstormingTeam team = new BrainstormingTeam(body.get("name").asText(), body.get("purpose").asText(), body.get("nrOfParticipants").asInt(), 1, participants, moderator);
 
-            teamCollection.insertOne(team, new SingleResultCallback<Void>() {
-                @Override
-                public void onResult(Void result, Throwable t) {
-                    Logger.info("Inserted BrainstormingTeam!");
-                }
-            });
+            service.insertTeam(team);
 
             return ok(Json.toJson(new SuccessMessage("Success", team.getIdentifier())));
         }
@@ -113,13 +101,7 @@ public class TeamController extends Controller {
 
             if (brainstormingTeam!= null && brainstormingTeam.getNrOfParticipants() > brainstormingTeam.getCurrentNrOfParticipants() && brainstormingTeam.joinTeam(participant)) {
 
-                teamCollection.updateOne(eq("identifier", teamIdentifier),combine(set("participants", brainstormingTeam.getParticipants()), inc("currentNrOfParticipants", 1)), new SingleResultCallback<UpdateResult>() {
-                    @Override
-                    public void onResult(final UpdateResult result, final Throwable t) {
-                        Logger.info(result.getModifiedCount() + " Team successfully updated");
-                    }
-                });
-
+                service.changeTeamMembers(brainstormingTeam, 1);
                 return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully added to the brainstormingTeam")));
 
             } else {
@@ -155,13 +137,7 @@ public class TeamController extends Controller {
 
             if (brainstormingTeam != null && brainstormingTeam.getCurrentNrOfParticipants() > 0 && brainstormingTeam.leaveTeam(participant)) {
 
-                teamCollection.updateOne(eq("identifier", teamIdentifier),combine(set("participants", brainstormingTeam.getParticipants()), inc("currentNrOfParticipants", -1)), new SingleResultCallback<UpdateResult>() {
-                    @Override
-                    public void onResult(final UpdateResult result, final Throwable t) {
-                        Logger.info(result.getModifiedCount() + " Team successfully updated");
-                    }
-                });
-
+                service.changeTeamMembers(brainstormingTeam, -1);
                 return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully removed from the brainstormingTeam")));
 
             } else {
@@ -190,17 +166,15 @@ public class TeamController extends Controller {
         } else if(  body.hasNonNull("identifier") &&
                     body.hasNonNull("moderator")) {
 
-            CompletableFuture<DeleteResult> future = new CompletableFuture<>();
+            BrainstormingTeam team = new BrainstormingTeam();
+            Participant participant = new Participant();
 
-            teamCollection.deleteOne(and(   eq("identifier", body.get("identifier").asText()),
-                                            eq("moderator.username", body.findPath("username").asText()),
-                                            eq("moderator.password", body.findPath("password").asText())), new SingleResultCallback<DeleteResult>() {
-                @Override
-                public void onResult(final DeleteResult result, final Throwable t) {
-                    Logger.info(result.getDeletedCount() + " Team successfully deleted");
-                    future.complete(result);
-                }
-            });
+            team.setId(new ObjectId(body.findPath("identifier").asText()));
+            participant.setUsername(body.findPath("moderator.username").asText());
+            participant.setPassword(body.findPath("moderator.password").asText());
+            team.setModerator(participant);
+
+            CompletableFuture<DeleteResult> future = service.deleteTeam(team);
 
             if (future.get().getDeletedCount() > 0){
                 return ok(Json.toJson(new SuccessMessage("Success", "Team successfully deleted")));
@@ -223,23 +197,10 @@ public class TeamController extends Controller {
             @ApiResponse(code = 200, message = "OK", response = BrainstormingTeam.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     public Result getBrainstormingTeamForParticipant(@ApiParam(value = "Participant username", name = "participant", required = true) String participant) throws ExecutionException, InterruptedException {
-        CompletableFuture<Queue<BrainstormingTeam>> future = new CompletableFuture<>();
-        Queue<BrainstormingTeam> queue = new ConcurrentLinkedQueue<>();
+        Participant newParticipant = new Participant();
+        newParticipant.setUsername(participant);
 
-        teamCollection.find(eq("participants.username", participant)).forEach(
-                new Block<BrainstormingTeam>() {
-                    @Override
-                    public void apply(final BrainstormingTeam team) {
-                        queue.add(team);
-                    }
-                }, new SingleResultCallback<Void>() {
-                    @Override
-                    public void onResult(final Void result, final Throwable t) {
-                        Logger.info("Get all BrainstormingTeams for participant!");
-                        future.complete(queue);
-                    }
-                });
-
+        CompletableFuture<Queue<BrainstormingTeam>> future = service.getAllTeamsOfParticipant(newParticipant);
         return ok(Json.toJson(future.get()));
     }
 
@@ -263,27 +224,8 @@ public class TeamController extends Controller {
     }
 
     public BrainstormingTeam getBrainstormingTeam(String teamIdentifier) throws ExecutionException, InterruptedException {
-        CompletableFuture<BrainstormingTeam> future = new CompletableFuture<>();
-
-        teamCollection.find(eq("identifier", teamIdentifier)).first(new SingleResultCallback<BrainstormingTeam>() {
-            @Override
-            public void onResult(BrainstormingTeam team, Throwable t) {
-                if (team != null) {
-                    Logger.info("Found brainstormingTeam");
-                    future.complete(team);
-                } else {
-                    future.complete(null);
-                }
-            }
-        });
-
-        BrainstormingTeam team = future.get();
-
-        if (team != null) {
-            return team;
-        } else {
-            return null;
-        }
+        CompletableFuture<BrainstormingTeam> future = service.getTeam(teamIdentifier);
+        return future.get();
     }
 
 }
