@@ -27,7 +27,7 @@ public class MongoDBTeamService {
     @Inject
     public MongoDBTeamService(MongoDBEngineProvider mongoDBEngineProvider) {
         this.mongoDBProvider = mongoDBEngineProvider;
-        teamCollection = mongoDBProvider.getDatabase().getCollection("BrainstormingTeam", BrainstormingTeam.class);
+        this.teamCollection = mongoDBProvider.getDatabase().getCollection("BrainstormingTeam", BrainstormingTeam.class);
     }
 
     public void insertTeam(BrainstormingTeam team){

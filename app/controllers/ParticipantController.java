@@ -27,6 +27,7 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import services.MongoDBParticipantService;
 
 import javax.inject.Inject;
 import java.io.UnsupportedEncodingException;
@@ -48,20 +49,11 @@ public class ParticipantController extends Controller {
     @Inject
     private Config config;
 
-    private MongoClient mongoClient;
-    private MongoDatabase database;
-    CodecRegistry pojoCodecRegistry;
-    MongoCollection<Participant> participantCollection;
+    private MongoDBParticipantService service;
 
-    public ParticipantController(){
-        pojoCodecRegistry = fromRegistries(MongoClients.getDefaultCodecRegistry(), fromProviders(PojoCodecProvider.builder().automatic(true).build()));
-        mongoClient = MongoClients.create(new ConnectionString("mongodb://play:Methode746@localhost:40002/?authSource=admin&authMechanism=SCRAM-SHA-1"));
-
-        database = mongoClient.getDatabase("Test");
-        database = database.withCodecRegistry(pojoCodecRegistry);
-
-        participantCollection = database.getCollection("Participant", Participant.class);
-
+    @Inject
+    public ParticipantController(MongoDBParticipantService mongoDBParticipantService){
+        this.service = mongoDBParticipantService;
     }
 
     @ApiOperation(
@@ -82,25 +74,15 @@ public class ParticipantController extends Controller {
         }
 
         if (body.hasNonNull("username") && body.hasNonNull("password")) {
-            CompletableFuture<Participant> future = new CompletableFuture<>();
+            String username = body.findPath("username").asText();
+            String password = body.findPath("password").asText();
 
-            participantCollection.find(and( eq("username", body.get("username").asText()),
-                                            eq("password", body.get("password").asText()))).first(new SingleResultCallback<Participant>() {
-                @Override
-                public void onResult(Participant participant, Throwable t) {
-                    if (participant != null) {
-                        Logger.info("Found participant");
-                        future.complete(participant);
-                    } else {
-                        future.complete(null);
-                    }
-                }
-            });
+            CompletableFuture<Participant> future = service.getParticipant(username,password);
 
             if (future.get()!= null){
                 ObjectNode result = Json.newObject();
                 result.putPOJO("participant", future.get());
-                result.put("access_token", getSignedToken(7l));
+                result.put("access_token", getSignedToken(username));
                 return ok(result);
             } else {
                 Logger.info("username or password not correct");
@@ -135,14 +117,7 @@ public class ParticipantController extends Controller {
                 body.hasNonNull("lastname")) {
 
             Participant participant = new Participant(body.get("username").asText(), body.get("password").asText(), body.get("firstname").asText(), body.get("lastname").asText());
-
-            participantCollection.insertOne(participant, new SingleResultCallback<Void>() {
-                @Override
-                public void onResult(Void result, Throwable t) {
-                    Logger.info("Inserted Participant!");
-                }
-            });
-
+            service.insertParticipant(participant);
             return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully inserted")));
         }
 
@@ -169,16 +144,14 @@ public class ParticipantController extends Controller {
                 body.hasNonNull("firstname") &&
                 body.hasNonNull("lastname")) {
 
-            CompletableFuture<DeleteResult> future = new CompletableFuture<>();
 
-            participantCollection.deleteOne(and(   eq("username", body.get("username").asText()),
-                                        eq("password", body.get("password").asText())), new SingleResultCallback<DeleteResult>() {
-                @Override
-                public void onResult(final DeleteResult result, final Throwable t) {
-                    Logger.info(result.getDeletedCount() + " Participant successfully deleted");
-                    future.complete(result);
-                }
-            });
+            Participant participant = new Participant();
+            participant.setUsername(body.findPath("username").asText());
+            participant.setPassword(body.findPath("password").asText());
+            participant.setFirstname(body.findPath("firstname").asText());
+            participant.setLastname(body.findPath("lastname").asText());
+
+            CompletableFuture<DeleteResult> future = service.deleteParticipant(participant);
 
             if (future.get().getDeletedCount() > 0){
                 return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully deleted")));
@@ -191,13 +164,13 @@ public class ParticipantController extends Controller {
         return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
     }
 
-    private String getSignedToken(Long userId) throws UnsupportedEncodingException {
+    private String getSignedToken(String username) throws UnsupportedEncodingException {
         String secret = config.getString("play.http.secret.key");
 
         Algorithm algorithm = Algorithm.HMAC256(secret);
         return JWT.create()
                 .withIssuer("ThePlayApp")
-                .withClaim("user_id", userId)
+                .withClaim("user", username)
                 .withExpiresAt(Date.from(ZonedDateTime.now(ZoneId.systemDefault()).plusMinutes(120).toInstant()))
                 .sign(algorithm);
     }
