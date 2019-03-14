@@ -30,8 +30,8 @@ GET     /Team/:teamIdentifier/getBrainstormingTeam                  controllers.
 
 + noJwtFilter
 GET     /Finding/:teamIdentifier/getBrainstormingFindings           controllers.FindingController.getBrainstormingFindingFromTeam(teamIdentifier)
-+ noJwtFilter
-POST    /Finding/:teamIdentifier/createBrainstormingFinding         controllers.FindingController.createBrainstormingFindingForTeam(teamIdentifier)
+#+ noJwtFilter
+#POST    /Finding/:teamIdentifier/createBrainstormingFinding         controllers.FindingController.createBrainstormingFindingForTeam(teamIdentifier)
 + noJwtFilter
 GET     /Finding/:findingIdentifier/getBrainstormingFinding         controllers.FindingController.getBrainstormingFindingByIdentifier(findingIdentifier)
 + noJwtFilter

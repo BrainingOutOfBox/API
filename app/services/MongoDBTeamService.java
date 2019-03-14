@@ -1,19 +1,10 @@
 package services;
 
-import com.mongodb.Block;
-import com.mongodb.ConnectionString;
-import com.mongodb.async.SingleResultCallback;
-import com.mongodb.async.client.MongoClient;
-import com.mongodb.async.client.MongoClients;
 import com.mongodb.async.client.MongoCollection;
-import com.mongodb.async.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
-import com.mongodb.client.result.UpdateResult;
-import com.typesafe.config.Config;
+import config.MongoDBEngineProvider;
 import models.BrainstormingTeam;
 import models.Participant;
-import org.bson.codecs.configuration.CodecRegistry;
-import org.bson.codecs.pojo.PojoCodecProvider;
 import play.Logger;
 
 import javax.inject.Inject;
@@ -27,35 +18,16 @@ import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.combine;
 import static com.mongodb.client.model.Updates.inc;
 import static com.mongodb.client.model.Updates.set;
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 public class MongoDBTeamService {
 
-    @Inject
-    private Config config;
-
-    private MongoClient mongoClient;
-    private MongoDatabase database;
-    CodecRegistry pojoCodecRegistry;
+    private MongoDBEngineProvider mongoDBProvider;
     MongoCollection<BrainstormingTeam> teamCollection;
 
-    public MongoDBTeamService() {
-        /*
-        String username = config.getString("db.default.username");
-        String password = config.getString("db.default.password");
-        String host = config.getString("db.default.host");
-        String port = config.getString("db.default.port");
-        String db = config.getString("play.db.default.database");
-        */
-
-        pojoCodecRegistry = fromRegistries(MongoClients.getDefaultCodecRegistry(), fromProviders(PojoCodecProvider.builder().automatic(true).build()));
-        mongoClient = MongoClients.create(new ConnectionString("mongodb://play:Methode746@localhost:40002/?authSource=admin&authMechanism=SCRAM-SHA-1"));
-
-        database = mongoClient.getDatabase("Test");
-        database = database.withCodecRegistry(pojoCodecRegistry);
-
-        teamCollection = database.getCollection("BrainstormingTeam", BrainstormingTeam.class);
+    @Inject
+    public MongoDBTeamService(MongoDBEngineProvider mongoDBEngineProvider) {
+        this.mongoDBProvider = mongoDBEngineProvider;
+        teamCollection = mongoDBProvider.getDatabase().getCollection("BrainstormingTeam", BrainstormingTeam.class);
     }
 
     public void insertTeam(BrainstormingTeam team){

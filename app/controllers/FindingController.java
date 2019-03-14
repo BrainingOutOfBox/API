@@ -49,6 +49,7 @@ public class FindingController extends Controller {
         findingCollection = database.getCollection("BrainstormingFinding", BrainstormingFinding.class);
     }
 
+    /*
     @ApiOperation(
             nickname = "createBrainstormingFinding",
             value = "Create a brainstormingFinding",
@@ -85,11 +86,13 @@ public class FindingController extends Controller {
                 return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam with this identifier found")));
             }
 
+
         return ok(Json.toJson(new SuccessMessage("Success", finding.getIdentifier())));
         }
 
         return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
     }
+    */
 
 
     @ApiOperation(

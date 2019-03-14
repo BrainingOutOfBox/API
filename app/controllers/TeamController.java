@@ -1,22 +1,10 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.mongodb.Block;
-import com.mongodb.ConnectionString;
-import com.mongodb.async.SingleResultCallback;
-import com.mongodb.async.client.MongoClient;
-import com.mongodb.async.client.MongoClients;
-import com.mongodb.async.client.MongoCollection;
-import com.mongodb.async.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
-import com.mongodb.client.result.UpdateResult;
 import io.swagger.annotations.*;
 import models.*;
-import org.bson.codecs.configuration.CodecRegistry;
-import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.types.ObjectId;
-import play.Logger;
 import play.libs.Json;
 import play.mvc.*;
 import services.MongoDBTeamService;
@@ -25,22 +13,16 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
-
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Updates.*;
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 @Api(value = "/Team", description = "All operations with team", produces = "application/json")
 public class TeamController extends Controller {
 
     private MongoDBTeamService service;
 
-    TeamController(){
-        service = new MongoDBTeamService();
+    @Inject
+    TeamController(MongoDBTeamService mongoDBTeamService){
+        this.service = mongoDBTeamService;
     }
 
     @ApiOperation(
