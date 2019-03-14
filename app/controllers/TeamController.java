@@ -151,9 +151,9 @@ public class TeamController extends Controller {
             BrainstormingTeam team = new BrainstormingTeam();
             Participant participant = new Participant();
 
-            team.setId(new ObjectId(body.findPath("identifier").asText()));
-            participant.setUsername(body.findPath("moderator.username").asText());
-            participant.setPassword(body.findPath("moderator.password").asText());
+            team.setIdentifier(body.findPath("identifier").asText());
+            participant.setUsername(body.findPath("username").asText());
+            participant.setPassword(body.findPath("password").asText());
             team.setModerator(participant);
 
             CompletableFuture<DeleteResult> future = service.deleteTeam(team);
