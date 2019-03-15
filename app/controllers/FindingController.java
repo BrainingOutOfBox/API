@@ -143,6 +143,30 @@ public class FindingController extends Controller {
     }
 
     @ApiOperation(
+            nickname = "calculateRemainingTime",
+            value = "Calculate remaining time",
+            notes = "With this method you can calculate the remaining time of the current round in the selected BrainstormFinding",
+            httpMethod = "GET",
+            response = SuccessMessage.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
+            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    public Result calculateRemainingTimeOfFinding(@ApiParam(value = "BrainstormingFinding Identifier", name = "findingIdentifier", required = true) String findingIdentifier) throws ExecutionException, InterruptedException {
+
+        CompletableFuture<BrainstormingFinding> future = service.getFinding(findingIdentifier);
+
+        long difference = 0;
+        BrainstormingFinding finding = future.get();
+        if (finding != null && !finding.getCurrentRoundEndTime().isEmpty()) {
+            DateTime currentRoundEndTime = DateTime.parse(finding.getCurrentRoundEndTime());
+            DateTime nowDate = new DateTime();
+            difference = getDateDiff(currentRoundEndTime, nowDate, TimeUnit.MILLISECONDS);
+        }
+        return ok(Json.toJson(difference));
+
+    }
+
+    @ApiOperation(
             nickname = "startBrainstormingFinding",
             value = "start a brainstormingFinding",
             notes = "With this method you can start the brainstormingFinding",
@@ -282,6 +306,11 @@ public class FindingController extends Controller {
                 team.getIdentifier());
 
         return finding;
+    }
+
+    private static long getDateDiff(DateTime date1, DateTime date2, TimeUnit timeUnit) {
+        long diffInMillisecondes = date1.getMillis() - date2.getMillis();
+        return timeUnit.convert(diffInMillisecondes,TimeUnit.MILLISECONDS);
     }
 
 }
