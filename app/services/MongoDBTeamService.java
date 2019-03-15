@@ -8,6 +8,7 @@ import models.Participant;
 import play.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -19,6 +20,7 @@ import static com.mongodb.client.model.Updates.combine;
 import static com.mongodb.client.model.Updates.inc;
 import static com.mongodb.client.model.Updates.set;
 
+@Singleton
 public class MongoDBTeamService {
 
     private MongoDBEngineProvider mongoDBProvider;

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.client.result.DeleteResult;
 import io.swagger.annotations.*;
 import models.*;
-import org.bson.types.ObjectId;
 import play.libs.Json;
 import play.mvc.*;
 import services.MongoDBTeamService;
@@ -178,11 +177,11 @@ public class TeamController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = BrainstormingTeam.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result getBrainstormingTeamForParticipant(@ApiParam(value = "Participant username", name = "participant", required = true) String participant) throws ExecutionException, InterruptedException {
-        Participant newParticipant = new Participant();
-        newParticipant.setUsername(participant);
+    public Result getBrainstormingTeamForParticipant(@ApiParam(value = "Participant username", name = "username", required = true) String username) throws ExecutionException, InterruptedException {
+        Participant participant = new Participant();
+        participant.setUsername(username);
 
-        CompletableFuture<Queue<BrainstormingTeam>> future = service.getAllTeamsOfParticipant(newParticipant);
+        CompletableFuture<Queue<BrainstormingTeam>> future = service.getAllTeamsOfParticipant(participant);
         return ok(Json.toJson(future.get()));
     }
 
