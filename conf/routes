@@ -20,7 +20,7 @@ POST    /Team/createBrainstormingTeam                               controllers.
 + noJwtFilter
 DELETE  /Team/deleteBrainstormingTeam                               controllers.TeamController.deleteBrainstormingTeam
 + noJwtFilter
-GET     /Team/:participant/getMyBrainstormingTeams                  controllers.TeamController.getBrainstormingTeamForParticipant(participant)
+GET     /Team/:username/getMyBrainstormingTeams                     controllers.TeamController.getBrainstormingTeamForParticipant(username)
 + noJwtFilter
 PUT     /Team/:teamIdentifier/joinTeam                              controllers.TeamController.joinBrainstormingTeam(teamIdentifier)
 + noJwtFilter
@@ -30,8 +30,8 @@ GET     /Team/:teamIdentifier/getBrainstormingTeam                  controllers.
 
 + noJwtFilter
 GET     /Finding/:teamIdentifier/getBrainstormingFindings           controllers.FindingController.getBrainstormingFindingFromTeam(teamIdentifier)
-#+ noJwtFilter
-#POST    /Finding/:teamIdentifier/createBrainstormingFinding         controllers.FindingController.createBrainstormingFindingForTeam(teamIdentifier)
++ noJwtFilter
+POST    /Finding/:teamIdentifier/createBrainstormingFinding         controllers.FindingController.createBrainstormingFindingForTeam(teamIdentifier)
 + noJwtFilter
 GET     /Finding/:findingIdentifier/getBrainstormingFinding         controllers.FindingController.getBrainstormingFindingByIdentifier(findingIdentifier)
 + noJwtFilter
