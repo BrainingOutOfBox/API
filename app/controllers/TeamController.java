@@ -3,9 +3,12 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.client.result.DeleteResult;
 import io.swagger.annotations.*;
+import mappers.ModelsMapper;
 import models.*;
 import models.bo.BrainstormingTeam;
 import models.bo.Participant;
+import models.dto.BrainstormingTeamDTO;
+import parsers.BrainstormingTeamDTOBodyParser;
 import play.libs.Json;
 import play.mvc.*;
 import services.MongoDBTeamService;
@@ -20,10 +23,12 @@ import java.util.concurrent.ExecutionException;
 public class TeamController extends Controller {
 
     private MongoDBTeamService service;
+    private ModelsMapper modelsMapper;
 
     @Inject
-    TeamController(MongoDBTeamService mongoDBTeamService){
+    TeamController(MongoDBTeamService mongoDBTeamService, ModelsMapper modelsMapper){
         this.service = mongoDBTeamService;
+        this.modelsMapper = modelsMapper;
     }
 
     @ApiOperation(
@@ -35,28 +40,17 @@ public class TeamController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    @BodyParser.Of(BrainstormingTeamDTOBodyParser.class)
     public Result createBrainstormingTeam(){
+        BrainstormingTeamDTO brainstormingTeamDTO = request().body().as(BrainstormingTeamDTO.class);
+        BrainstormingTeam brainstormingTeam = modelsMapper.toBrainstormingTeam(brainstormingTeamDTO);
 
-        JsonNode body = request().body().asJson();
+        Participant participant = new Participant(brainstormingTeamDTO.getModerator().getUsername(), brainstormingTeamDTO.getModerator().getPassword(), brainstormingTeamDTO.getModerator().getFirstname(), brainstormingTeamDTO.getModerator().getLastname());
+        brainstormingTeam.getParticipants().add(participant);
 
-        if (body == null ) {
-            return forbidden(Json.toJson(new ErrorMessage("Error", "json body is null")));
-        } else if(  body.hasNonNull("name") &&
-                    body.hasNonNull("purpose") &&
-                    body.hasNonNull("nrOfParticipants") &&
-                    body.hasNonNull("moderator")) {
+        service.insertTeam(brainstormingTeam);
+        return ok(Json.toJson(new SuccessMessage("Success", brainstormingTeam.getIdentifier())));
 
-            ArrayList<Participant> participants = new ArrayList<>(body.get("nrOfParticipants").asInt());
-            Participant moderator = new Participant(body.findPath("username").asText() , body.findPath("password").asText(), body.findPath("firstname").asText(), body.findPath("lastname").asText());
-            participants.add(moderator);
-            BrainstormingTeam team = new BrainstormingTeam(body.get("name").asText(), body.get("purpose").asText(), body.get("nrOfParticipants").asInt(), 1, participants, moderator);
-
-            service.insertTeam(team);
-
-            return ok(Json.toJson(new SuccessMessage("Success", team.getIdentifier())));
-        }
-
-        return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
     }
 
     @ApiOperation(

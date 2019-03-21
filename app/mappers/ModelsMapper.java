@@ -1,17 +1,20 @@
 package mappers;
 
+import models.bo.BrainstormingTeam;
 import models.bo.Participant;
 import models.dto.BrainstormingFindingDTO;
 import models.bo.BrainstormingFinding;
+import models.dto.BrainstormingTeamDTO;
 import models.dto.ParticipantDTO;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 
 public class ModelsMapper {
 
     private ModelMapper modelMapper;
 
     public ModelsMapper() {
-        modelMapper = new ModelMapper();
+        this.modelMapper = new ModelMapper();
     }
 
     public BrainstormingFindingDTO toBrainstormingFindingDTO(BrainstormingFinding finding){
@@ -28,6 +31,14 @@ public class ModelsMapper {
 
     public Participant toParticipant(ParticipantDTO participantDTO){
         return modelMapper.map(participantDTO, Participant.class);
+    }
+
+    public BrainstormingTeamDTO tobrainstormingTeamDTO(BrainstormingTeam brainstormingTeam){
+        return modelMapper.map(brainstormingTeam, BrainstormingTeamDTO.class);
+    }
+
+    public BrainstormingTeam toBrainstormingTeam(BrainstormingTeamDTO brainstormingTeamDTO){
+        return modelMapper.map(brainstormingTeamDTO, BrainstormingTeam.class);
     }
 
 }

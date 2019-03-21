@@ -2,6 +2,7 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.annotations.*;
+import mappers.ModelsMapper;
 import models.*;
 import models.bo.*;
 import org.joda.time.DateTime;
@@ -22,11 +23,13 @@ public class FindingController extends Controller {
 
     private MongoDBFindingService service;
     private MongoDBTeamService teamService;
+    private ModelsMapper modelsMapper;
 
     @Inject
-    public FindingController(MongoDBFindingService mongoDBFindingService, MongoDBTeamService mongoDBTeamService){
+    public FindingController(MongoDBFindingService mongoDBFindingService, MongoDBTeamService mongoDBTeamService, ModelsMapper modelsMapper){
         this.service = mongoDBFindingService;
         this.teamService = mongoDBTeamService;
+        this.modelsMapper = modelsMapper;
     }
 
     @ApiOperation(
@@ -49,7 +52,7 @@ public class FindingController extends Controller {
                     body.hasNonNull("nrOfIdeas") &&
                     body.hasNonNull("baseRoundTime")) {
 
-            TeamController teamController = new TeamController(teamService);
+            TeamController teamController = new TeamController(teamService, modelsMapper);
             BrainstormingTeam team = teamController.getBrainstormingTeam(teamIdentifier);
             BrainstormingFinding finding;
             if (team != null) {
