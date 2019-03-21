@@ -3,8 +3,8 @@ package services;
 import com.mongodb.async.client.MongoCollection;
 import com.mongodb.client.result.DeleteResult;
 import config.MongoDBEngineProvider;
-import models.BrainstormingTeam;
-import models.Participant;
+import models.bo.BrainstormingTeam;
+import models.bo.Participant;
 import play.Logger;
 
 import javax.inject.Inject;

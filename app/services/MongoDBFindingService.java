@@ -4,9 +4,9 @@ import com.mongodb.async.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.PushOptions;
 import config.MongoDBEngineProvider;
-import models.Brainsheet;
-import models.BrainstormingFinding;
-import models.BrainstormingTeam;
+import models.bo.Brainsheet;
+import models.bo.BrainstormingFinding;
+import models.bo.BrainstormingTeam;
 import org.joda.time.DateTime;
 import play.Logger;
 

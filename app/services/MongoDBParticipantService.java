@@ -1,10 +1,9 @@
 package services;
 
-import com.mongodb.async.SingleResultCallback;
 import com.mongodb.async.client.MongoCollection;
 import com.mongodb.client.result.DeleteResult;
 import config.MongoDBEngineProvider;
-import models.Participant;
+import models.bo.Participant;
 import play.Logger;
 
 import javax.inject.Inject;
@@ -36,6 +35,21 @@ public class MongoDBParticipantService {
                         future.complete(null);
                     }
                 });
+
+        return future;
+    }
+
+    public CompletableFuture<Participant> getParticipant(String username){
+        CompletableFuture<Participant> future = new CompletableFuture<>();
+
+        participantCollection.find(eq("username", username)).first((participant, t) -> {
+            if (participant != null) {
+                Logger.info("Found participant");
+                future.complete(participant);
+            } else {
+                future.complete(null);
+            }
+        });
 
         return future;
     }
