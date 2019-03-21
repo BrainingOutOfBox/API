@@ -27,8 +27,10 @@ package jwt.filter;
 import akka.stream.Materializer;
 import jwt.JwtValidator;
 import jwt.VerifiedJwt;
+import models.ErrorMessage;
 import play.Logger;
 import play.libs.F;
+import play.libs.Json;
 import play.mvc.Filter;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -72,7 +74,7 @@ public class JwtFilter extends Filter {
 
         if (!authHeader.filter(ah -> ah.contains(BEARER)).isPresent()) {
             Logger.error("f=JwtFilter, error=authHeaderNotPresent");
-            return CompletableFuture.completedFuture(forbidden(ERR_AUTHORIZATION_HEADER));
+            return CompletableFuture.completedFuture(forbidden(Json.toJson(new ErrorMessage("Error", ERR_AUTHORIZATION_HEADER + ": No JWT-Token"))));
         }
 
         String token = authHeader.map(ah -> ah.replace(BEARER, "")).orElse("");
