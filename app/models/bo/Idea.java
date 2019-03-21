@@ -1,4 +1,4 @@
-package models;
+package models.bo;
 
 public final class Idea {
     private String description;

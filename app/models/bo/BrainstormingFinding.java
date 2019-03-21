@@ -1,7 +1,6 @@
-package models;
+package models.bo;
 
 import org.bson.types.ObjectId;
-import com.mongodb.DBRef;
 
 import java.util.ArrayList;
 import java.util.UUID;
