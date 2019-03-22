@@ -25,16 +25,10 @@ import java.util.concurrent.*;
 @Api(value = "/BrainstormingFinding", description = "All operations with brainstormingFindings", produces = "application/json")
 public class FindingController extends Controller {
 
-    private MongoDBFindingService service;
-    private MongoDBTeamService teamService;
-    private ModelsMapper modelsMapper;
-
     @Inject
-    public FindingController(MongoDBFindingService mongoDBFindingService, MongoDBTeamService mongoDBTeamService, ModelsMapper modelsMapper){
-        this.service = mongoDBFindingService;
-        this.teamService = mongoDBTeamService;
-        this.modelsMapper = modelsMapper;
-    }
+    private MongoDBFindingService service;
+    @Inject
+    private ModelsMapper modelsMapper;
 
     @ApiOperation(
             nickname = "createBrainstormingFinding",
@@ -47,7 +41,7 @@ public class FindingController extends Controller {
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     @BodyParser.Of(BrainstormingFindingDTOBodyParser.class)
     public Result createBrainstormingFindingForTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
-        TeamController teamController = new TeamController(teamService, modelsMapper);
+        TeamController teamController = new TeamController();
         BrainstormingTeam team = teamController.getBrainstormingTeam(teamIdentifier);
 
         BrainstormingFindingDTO brainstormingFindingDTO = request().body().as(BrainstormingFindingDTO.class);

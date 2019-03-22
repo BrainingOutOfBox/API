@@ -23,14 +23,10 @@ import java.util.concurrent.ExecutionException;
 @Api(value = "/Team", description = "All operations with team", produces = "application/json")
 public class TeamController extends Controller {
 
-    private MongoDBTeamService service;
-    private ModelsMapper modelsMapper;
-
     @Inject
-    TeamController(MongoDBTeamService mongoDBTeamService, ModelsMapper modelsMapper){
-        this.service = mongoDBTeamService;
-        this.modelsMapper = modelsMapper;
-    }
+    private MongoDBTeamService service;
+    @Inject
+    private ModelsMapper modelsMapper;
 
     @ApiOperation(
             nickname = "createBrainstormingTeam",

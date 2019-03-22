@@ -44,15 +44,10 @@ public class ParticipantController extends Controller {
 
     @Inject
     private Config config;
-
-    private MongoDBParticipantService service;
-    private ModelsMapper modelsMapper;
-
     @Inject
-    public ParticipantController(MongoDBParticipantService mongoDBParticipantService, ModelsMapper modelsMapper){
-        this.service = mongoDBParticipantService;
-        this.modelsMapper = modelsMapper;
-    }
+    private MongoDBParticipantService service;
+    @Inject
+    private ModelsMapper modelsMapper;
 
     @ApiOperation(
             nickname = "login",
