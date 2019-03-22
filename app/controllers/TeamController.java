@@ -16,6 +16,7 @@ import play.mvc.*;
 import services.MongoDBTeamService;
 
 import javax.inject.Inject;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -144,7 +145,12 @@ public class TeamController extends Controller {
         participant.setUsername(username);
 
         CompletableFuture<Queue<BrainstormingTeam>> future = service.getAllTeamsOfParticipant(participant);
-        return ok(Json.toJson(future.get()));
+        Queue<BrainstormingTeamDTO> list = new LinkedList<>();
+        for (BrainstormingTeam brainstormingTeam : future.get()) {
+            BrainstormingTeamDTO brainstormingTeamDTO = modelsMapper.tobrainstormingTeamDTO(brainstormingTeam);
+            list.add(brainstormingTeamDTO);
+        }
+        return ok(Json.toJson(list));
     }
 
     @ApiOperation(
@@ -160,7 +166,8 @@ public class TeamController extends Controller {
         BrainstormingTeam team = getBrainstormingTeam(teamIdentifier);
 
         if (team != null) {
-            return ok(Json.toJson(team));
+            BrainstormingTeamDTO brainstormingTeamDTO = modelsMapper.tobrainstormingTeamDTO(team);
+            return ok(Json.toJson(brainstormingTeamDTO));
         } else {
             return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam found")));
         }
