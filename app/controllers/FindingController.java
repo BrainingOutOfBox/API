@@ -15,7 +15,6 @@ import play.mvc.Controller;
 import play.mvc.Result;
 
 import services.MongoDBFindingService;
-import services.MongoDBTeamService;
 
 import javax.inject.Inject;
 import java.util.*;
