@@ -67,7 +67,6 @@ public class TeamController extends Controller {
         BrainstormingTeam brainstormingTeam = getBrainstormingTeam(teamIdentifier);
 
         if (brainstormingTeam!= null && brainstormingTeam.getNrOfParticipants() > brainstormingTeam.getCurrentNrOfParticipants() && brainstormingTeam.joinTeam(participant)) {
-
             service.changeTeamMembers(brainstormingTeam, 1);
             return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully added to the brainstormingTeam")));
 
