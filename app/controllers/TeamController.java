@@ -1,6 +1,5 @@
 package controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.client.result.DeleteResult;
 import io.swagger.annotations.*;
 import mappers.ModelsMapper;
@@ -173,7 +172,7 @@ public class TeamController extends Controller {
         }
     }
 
-    public BrainstormingTeam getBrainstormingTeam(String teamIdentifier) throws ExecutionException, InterruptedException {
+    BrainstormingTeam getBrainstormingTeam(String teamIdentifier) throws ExecutionException, InterruptedException {
         CompletableFuture<BrainstormingTeam> future = service.getTeam(teamIdentifier);
         return future.get();
     }

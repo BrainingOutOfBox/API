@@ -19,7 +19,8 @@ public class BrainstormingFindingDTO {
     private String brainstormingTeam;
 
     public BrainstormingFindingDTO(){
-
+        this.identifier = UUID.randomUUID().toString();
+        this.brainsheets = new ArrayList<>();
     }
 
     public BrainstormingFindingDTO(String name, String problemDescription, int nrOfIdeas, int baseRoundTime, int currentRound, String currentRoundEndTime, ArrayList<BrainsheetDTO> brainsheetsDTO, int deliveredBrainsheetsInCurrentRound, String brainstormingTeam) {

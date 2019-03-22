@@ -3,7 +3,7 @@ package models.dto;
 import java.util.ArrayList;
 
 public final class BrainsheetDTO {
-    private int nrOfSheet;
+    private int nrOfSheet = -1;
     private ArrayList<BrainwaveDTO> brainwaves = new ArrayList<>();
 
     public BrainsheetDTO() {

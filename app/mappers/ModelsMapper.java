@@ -1,13 +1,14 @@
 package mappers;
 
+import models.bo.Brainsheet;
 import models.bo.BrainstormingTeam;
 import models.bo.Participant;
+import models.dto.BrainsheetDTO;
 import models.dto.BrainstormingFindingDTO;
 import models.bo.BrainstormingFinding;
 import models.dto.BrainstormingTeamDTO;
 import models.dto.ParticipantDTO;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.PropertyMap;
 
 public class ModelsMapper {
 
@@ -39,6 +40,14 @@ public class ModelsMapper {
 
     public BrainstormingTeam toBrainstormingTeam(BrainstormingTeamDTO brainstormingTeamDTO){
         return modelMapper.map(brainstormingTeamDTO, BrainstormingTeam.class);
+    }
+
+    public BrainsheetDTO toBrainsheetDTO(Brainsheet brainsheet){
+        return modelMapper.map(brainsheet, BrainsheetDTO.class);
+    }
+
+    public Brainsheet toBrainsheet(BrainsheetDTO brainsheetDTO){
+        return modelMapper.map(brainsheetDTO, Brainsheet.class);
     }
 
 }

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import models.ErrorMessage;
 import models.dto.BrainstormingFindingDTO;
 import play.libs.F;
-import play.libs.Json;
 import play.libs.streams.Accumulator;
 import play.mvc.BodyParser;
 import play.mvc.Http;
