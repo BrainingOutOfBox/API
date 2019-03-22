@@ -8,13 +8,14 @@ import models.*;
 import models.bo.BrainstormingTeam;
 import models.bo.Participant;
 import models.dto.BrainstormingTeamDTO;
+import models.dto.ParticipantDTO;
 import parsers.BrainstormingTeamDTOBodyParser;
+import parsers.ParticipantDTOBodyParser;
 import play.libs.Json;
 import play.mvc.*;
 import services.MongoDBTeamService;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -46,7 +47,8 @@ public class TeamController extends Controller {
         BrainstormingTeam brainstormingTeam = modelsMapper.toBrainstormingTeam(brainstormingTeamDTO);
 
         Participant participant = new Participant(brainstormingTeamDTO.getModerator().getUsername(), brainstormingTeamDTO.getModerator().getPassword(), brainstormingTeamDTO.getModerator().getFirstname(), brainstormingTeamDTO.getModerator().getLastname());
-        brainstormingTeam.getParticipants().add(participant);
+        brainstormingTeam.joinTeam(participant);
+        brainstormingTeam.setCurrentNrOfParticipants(1);
 
         service.insertTeam(brainstormingTeam);
         return ok(Json.toJson(new SuccessMessage("Success", brainstormingTeam.getIdentifier())));
@@ -62,31 +64,21 @@ public class TeamController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    @BodyParser.Of(ParticipantDTOBodyParser.class)
     public Result joinBrainstormingTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
+        ParticipantDTO participantDTO = request().body().as(ParticipantDTO.class);
+        Participant participant = modelsMapper.toParticipant(participantDTO);
+        BrainstormingTeam brainstormingTeam = getBrainstormingTeam(teamIdentifier);
 
-        JsonNode body = request().body().asJson();
+        if (brainstormingTeam!= null && brainstormingTeam.getNrOfParticipants() > brainstormingTeam.getCurrentNrOfParticipants() && brainstormingTeam.joinTeam(participant)) {
 
-        if (body == null ) {
-            return forbidden(Json.toJson(new ErrorMessage("Error", "json body is null")));
-        } else if(  body.hasNonNull("username") &&
-                    body.hasNonNull("password") &&
-                    body.hasNonNull("firstname") &&
-                    body.hasNonNull("lastname")) {
+            service.changeTeamMembers(brainstormingTeam, 1);
+            return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully added to the brainstormingTeam")));
 
-            Participant participant = new Participant(body.findPath("username").asText() , body.findPath("password").asText(), body.findPath("firstname").asText(), body.findPath("lastname").asText());
-            BrainstormingTeam brainstormingTeam = getBrainstormingTeam(teamIdentifier);
-
-            if (brainstormingTeam!= null && brainstormingTeam.getNrOfParticipants() > brainstormingTeam.getCurrentNrOfParticipants() && brainstormingTeam.joinTeam(participant)) {
-
-                service.changeTeamMembers(brainstormingTeam, 1);
-                return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully added to the brainstormingTeam")));
-
-            } else {
-                return internalServerError(Json.toJson(new ErrorMessage("Error", "The limit of the team size is reached or the participant is already in the brainstormingTeam or this team does not exist")));
-            }
+        } else {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", "The limit of the team size is reached or the participant is already in the brainstormingTeam or this team does not exist")));
         }
 
-        return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
     }
 
     @ApiOperation(
@@ -98,31 +90,20 @@ public class TeamController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    @BodyParser.Of(ParticipantDTOBodyParser.class)
     public Result leaveBrainstormingTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
+        ParticipantDTO participantDTO = request().body().as(ParticipantDTO.class);
+        Participant participant = modelsMapper.toParticipant(participantDTO);
+        BrainstormingTeam brainstormingTeam = getBrainstormingTeam(teamIdentifier);
 
-        JsonNode body = request().body().asJson();
+        if (brainstormingTeam != null && brainstormingTeam.getCurrentNrOfParticipants() > 0 && brainstormingTeam.leaveTeam(participant)) {
 
-        if (body == null ) {
-            return forbidden(Json.toJson(new ErrorMessage("Error", "json body is null")));
-        } else if(  body.hasNonNull("username") &&
-                    body.hasNonNull("password") &&
-                    body.hasNonNull("firstname") &&
-                    body.hasNonNull("lastname")) {
+            service.changeTeamMembers(brainstormingTeam, -1);
+            return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully removed from the brainstormingTeam")));
 
-            Participant participant = new Participant(body.findPath("username").asText() , body.findPath("password").asText(), body.findPath("firstname").asText(), body.findPath("lastname").asText());
-            BrainstormingTeam brainstormingTeam = getBrainstormingTeam(teamIdentifier);
-
-            if (brainstormingTeam != null && brainstormingTeam.getCurrentNrOfParticipants() > 0 && brainstormingTeam.leaveTeam(participant)) {
-
-                service.changeTeamMembers(brainstormingTeam, -1);
-                return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully removed from the brainstormingTeam")));
-
-            } else {
-                return internalServerError(Json.toJson(new ErrorMessage("Error", "There are no more participants in the brainstormingTeam or the participant has already left the brainstormingTeam or this team does not exist")));
-            }
+        } else {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", "There are no more participants in the brainstormingTeam or the participant has already left the brainstormingTeam or this team does not exist")));
         }
-
-        return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
     }
 
     @ApiOperation(
@@ -134,33 +115,18 @@ public class TeamController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    @BodyParser.Of(BrainstormingTeamDTOBodyParser.class)
     public Result deleteBrainstormingTeam() throws ExecutionException, InterruptedException {
+        BrainstormingTeamDTO brainstormingTeamDTO = request().body().as(BrainstormingTeamDTO.class);
+        BrainstormingTeam brainstormingTeam = modelsMapper.toBrainstormingTeam(brainstormingTeamDTO);
 
-        JsonNode body = request().body().asJson();
+        CompletableFuture<DeleteResult> future = service.deleteTeam(brainstormingTeam);
 
-        if (body == null ) {
-            return forbidden(Json.toJson(new ErrorMessage("Error", "json body is null")));
-        } else if(  body.hasNonNull("identifier") &&
-                    body.hasNonNull("moderator")) {
-
-            BrainstormingTeam team = new BrainstormingTeam();
-            Participant participant = new Participant();
-
-            team.setIdentifier(body.findPath("identifier").asText());
-            participant.setUsername(body.findPath("username").asText());
-            participant.setPassword(body.findPath("password").asText());
-            team.setModerator(participant);
-
-            CompletableFuture<DeleteResult> future = service.deleteTeam(team);
-
-            if (future.get().getDeletedCount() > 0){
-                return ok(Json.toJson(new SuccessMessage("Success", "Team successfully deleted")));
-            } else {
-                return internalServerError(Json.toJson(new ErrorMessage("Error", "No Team deleted! Does the identifier exist and is moderator's username and password correct?")));
-            }
+        if (future.get().getDeletedCount() > 0){
+            return ok(Json.toJson(new SuccessMessage("Success", "Team successfully deleted")));
+        } else {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", "No Team deleted! Does the identifier exist and is moderator's username and password correct?")));
         }
-
-        return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
     }
 
 
