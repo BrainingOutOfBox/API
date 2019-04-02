@@ -12,6 +12,7 @@ import parsers.ParticipantDTOBodyParser;
 import play.libs.Json;
 import play.mvc.*;
 import services.MongoDBTeamService;
+import services.TeamService;
 
 import javax.inject.Inject;
 import java.util.LinkedList;
@@ -23,7 +24,8 @@ import java.util.concurrent.ExecutionException;
 public class TeamController extends Controller {
 
     @Inject
-    private MongoDBTeamService service;
+    private TeamService service;
+    
     @Inject
     private ModelsMapper modelsMapper;
 

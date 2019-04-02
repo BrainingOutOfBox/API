@@ -22,6 +22,7 @@ import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import services.MongoDBParticipantService;
+import services.ParticipantService;
 
 import javax.inject.Inject;
 import java.io.UnsupportedEncodingException;
@@ -38,7 +39,7 @@ public class ParticipantController extends Controller {
     @Inject
     private Config config;
     @Inject
-    private MongoDBParticipantService service;
+    private ParticipantService service;
     @Inject
     private ModelsMapper modelsMapper;
 
@@ -56,7 +57,7 @@ public class ParticipantController extends Controller {
         ParticipantDTO participantDTO = request().body().as(ParticipantDTO.class);
         Participant participant = modelsMapper.toParticipant(participantDTO);
 
-        CompletableFuture<Participant> future = service.getParticipant(participant.getUsername(),participant.getPassword());
+        CompletableFuture<Participant> future = service.getParticipant(participant);
 
         if (future.get() != null){
             participantDTO = modelsMapper.toParticipantDTO(future.get());
@@ -83,7 +84,7 @@ public class ParticipantController extends Controller {
 
         ParticipantDTO participantDTO = request().body().as(ParticipantDTO.class);
         Participant participant = modelsMapper.toParticipant(participantDTO);
-        CompletableFuture<Participant> future = service.getParticipant(participant.getUsername());
+        CompletableFuture<Participant> future = service.getParticipant(participant);
 
         if (future.get() == null){
             service.insertParticipant(participant);
