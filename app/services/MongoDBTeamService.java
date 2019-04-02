@@ -20,8 +20,7 @@ import static com.mongodb.client.model.Updates.combine;
 import static com.mongodb.client.model.Updates.inc;
 import static com.mongodb.client.model.Updates.set;
 
-@Singleton
-public class MongoDBTeamService {
+public class MongoDBTeamService implements DBTeamInterface {
 
     private MongoDBEngineProvider mongoDBProvider;
     MongoCollection<BrainstormingTeam> teamCollection;
@@ -40,14 +39,14 @@ public class MongoDBTeamService {
         teamCollection.updateOne(eq("identifier", team.getIdentifier()),combine(set("participants", team.getParticipants()), inc("currentNrOfParticipants", number)), (result, t) -> Logger.info(result.getModifiedCount() + " Team successfully updated"));
     }
 
-    public CompletableFuture<DeleteResult> deleteTeam(BrainstormingTeam team){
-        CompletableFuture<DeleteResult> future = new CompletableFuture<>();
+    public CompletableFuture<Long> deleteTeam(BrainstormingTeam team){
+        CompletableFuture<Long> future = new CompletableFuture<>();
 
         teamCollection.deleteOne(and(   eq("identifier", team.getIdentifier()),
                                         eq("moderator.username", team.getModerator().getUsername()),
                                         eq("moderator.password", team.getModerator().getPassword())), (result, t) -> {
                                             Logger.info(result.getDeletedCount() + " Team successfully deleted");
-                                            future.complete(result);
+                                            future.complete(result.getDeletedCount());
                                         });
         return future;
     }

@@ -1,6 +1,5 @@
 package controllers;
 
-import com.mongodb.client.result.DeleteResult;
 import io.swagger.annotations.*;
 import mappers.ModelsMapper;
 import models.*;
@@ -115,9 +114,9 @@ public class TeamController extends Controller {
         BrainstormingTeamDTO brainstormingTeamDTO = request().body().as(BrainstormingTeamDTO.class);
         BrainstormingTeam brainstormingTeam = modelsMapper.toBrainstormingTeam(brainstormingTeamDTO);
 
-        CompletableFuture<DeleteResult> future = service.deleteTeam(brainstormingTeam);
+        CompletableFuture<Long> future = service.deleteTeam(brainstormingTeam);
 
-        if (future.get().getDeletedCount() > 0){
+        if (future.get() > 0){
             return ok(Json.toJson(new SuccessMessage("Success", "Team successfully deleted")));
         } else {
             return internalServerError(Json.toJson(new ErrorMessage("Error", "No Team deleted! Does the identifier exist and is moderator's username and password correct?")));

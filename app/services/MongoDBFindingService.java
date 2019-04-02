@@ -11,6 +11,7 @@ import org.joda.time.DateTime;
 import play.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Arrays;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -20,7 +21,7 @@ import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.*;
 import static com.mongodb.client.model.Updates.pushEach;
 
-public class MongoDBFindingService {
+public class MongoDBFindingService implements DBFindingInterface {
 
     private MongoDBEngineProvider mongoDBProvider;
     MongoCollection<BrainstormingFinding> findingCollection;

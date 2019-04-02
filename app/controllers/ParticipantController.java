@@ -109,9 +109,9 @@ public class ParticipantController extends Controller {
         ParticipantDTO participantDTO = request().body().as(ParticipantDTO.class);
         Participant participant = modelsMapper.toParticipant(participantDTO);
 
-        CompletableFuture<DeleteResult> future = service.deleteParticipant(participant);
+        CompletableFuture<Long> future = service.deleteParticipant(participant);
 
-        if (future.get().getDeletedCount() > 0){
+        if (future.get() > 0){
             return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully deleted")));
         } else {
             return internalServerError(Json.toJson(new ErrorMessage("Error", "No Participant deleted! Is username and password correct?")));

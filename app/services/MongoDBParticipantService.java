@@ -1,18 +1,19 @@
 package services;
 
 import com.mongodb.async.client.MongoCollection;
-import com.mongodb.client.result.DeleteResult;
 import config.MongoDBEngineProvider;
 import models.bo.Participant;
 import play.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.concurrent.CompletableFuture;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 
-public class MongoDBParticipantService {
+
+public class MongoDBParticipantService implements DBParticipantInterface {
 
     private MongoDBEngineProvider mongoDBProvider;
     MongoCollection<Participant> participantCollection;
@@ -58,13 +59,13 @@ public class MongoDBParticipantService {
         participantCollection.insertOne(participant, (result, t) -> Logger.info("Participant successfully inserted"));
     }
 
-    public CompletableFuture<DeleteResult> deleteParticipant(Participant participant){
-        CompletableFuture<DeleteResult> future = new CompletableFuture<>();
+    public CompletableFuture<Long> deleteParticipant(Participant participant) {
+        CompletableFuture<Long> future = new CompletableFuture<>();
 
         participantCollection.deleteOne(and( eq("username", participant.getUsername()),
                                              eq("password", participant.getPassword())), (result, t) -> {
                                                  Logger.info(result.getDeletedCount() + " Participant successfully deleted");
-                                                 future.complete(result);
+                                                 future.complete(result.getDeletedCount());
                                              });
 
         return future;
