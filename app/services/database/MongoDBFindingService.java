@@ -69,11 +69,11 @@ public class MongoDBFindingService implements DBFindingInterface {
     }
 
     public void nextRound(BrainstormingFinding finding){
-        findingCollection.updateOne(eq("identifier", finding.getIdentifier()), combine(set("currentRoundEndTime", new DateTime().plusMinutes(finding.getBaseRoundTime()+finding.getCurrentRound()).toString()), inc("currentRound", 1), set("deliveredBrainsheetsInCurrentRound", 0)), (result, t) -> Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated"));
+        findingCollection.updateOne(eq("identifier", finding.getIdentifier()), combine(set("currentRoundEndTime", new DateTime().plusMinutes(finding.getBaseRoundTime()+finding.getCurrentRound()).toString()), inc("currentRound", 1), set("deliveredBrainsheetsInCurrentRound", 0)), (result, t) -> Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated (next Round)"));
     }
 
     public void lastRound(BrainstormingFinding finding){
-        findingCollection.updateOne(eq("identifier", finding.getIdentifier()), set("currentRound", -1), (result, t) -> Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated"));
+        findingCollection.updateOne(eq("identifier", finding.getIdentifier()), set("currentRound", -1), (result, t) -> Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated (last Round)"));
     }
 
 

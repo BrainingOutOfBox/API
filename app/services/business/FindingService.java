@@ -49,9 +49,12 @@ public class FindingService {
         if (finding == null){
             return false;
         } else {
-            Brainsheet oldBrainsheet = finding.getBrainsheets().get(newBrainsheet.getNrOfSheet());
-            service.exchangeBrainsheet(finding, oldBrainsheet, newBrainsheet);
-            return true;
+            if (newBrainsheet.getNrOfSheet() < finding.getBrainsheets().size()) {
+                Brainsheet oldBrainsheet = finding.getBrainsheets().get(newBrainsheet.getNrOfSheet());
+                service.exchangeBrainsheet(finding, oldBrainsheet, newBrainsheet);
+                return true;
+            }
+            return false;
         }
 
     }
@@ -61,18 +64,22 @@ public class FindingService {
 
         if(finding != null && finding.getCurrentRound() == 0) {
             startWatcherForBrainstormingFinding(finding.getIdentifier());
-            //nextRound(finding);
+            nextRound(finding);
             return true;
         }
         return false;
     }
 
-    public void nextRound(BrainstormingFinding finding){
-        service.nextRound(finding);
+    private void nextRound(BrainstormingFinding finding){
+        if (finding != null) {
+            service.nextRound(finding);
+        }
     }
 
-    public void lastRound(BrainstormingFinding finding){
-        service.lastRound(finding);
+    private void lastRound(BrainstormingFinding finding){
+        if (finding != null) {
+            service.lastRound(finding);
+        }
     }
 
     public long calculateRemainingTimeOfFinding(String findingIdentifier) throws ExecutionException, InterruptedException {
@@ -86,11 +93,6 @@ public class FindingService {
         }
         return difference;
     }
-
-
-
-
-
 
     private void startWatcherForBrainstormingFinding(String findingIdentifier){
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();

@@ -102,9 +102,9 @@ public class FindingController extends Controller {
         try {
 
             BrainstormingFinding finding = service.getFinding(findingIdentifier).get();
-            BrainstormingFindingDTO brainstormingFindingDTO = modelsMapper.toBrainstormingFindingDTO(finding);
 
             if (finding != null) {
+                BrainstormingFindingDTO brainstormingFindingDTO = modelsMapper.toBrainstormingFindingDTO(finding);
                 return ok(Json.toJson(brainstormingFindingDTO));
             } else {
                 return badRequest(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found")));
@@ -171,13 +171,16 @@ public class FindingController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result startBrainstorming(String findingIdentifier) throws ExecutionException, InterruptedException {
-        BrainstormingFinding finding = getBrainstormingFinding(findingIdentifier);
-        if(finding != null && finding.getCurrentRound() == 0) {
-            startWatcherForBrainstormingFinding(finding.getIdentifier());
-            return nextRound(finding);
+    public Result startBrainstorming(String findingIdentifier){
+        try {
+            if(service.startBrainstorming(findingIdentifier)) {
+                return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingFinding successfully started")));
+            } else {
+                return badRequest(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found or brainstormingFinding has already started or ended")));
+            }
+        } catch (ExecutionException | InterruptedException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
-        return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found or brainstormingFinding has already started or ended")));
     }
 
     /*private void startWatcherForBrainstormingFinding(String findingIdentifier){
@@ -221,7 +224,7 @@ public class FindingController extends Controller {
 
         executor.scheduleAtFixedRate(task, 1000L, 5000L, TimeUnit.MILLISECONDS);
     }*/
-
+/*
     private Result nextRound(BrainstormingFinding finding){
         if (finding != null) {
             service.nextRound(finding);
@@ -238,12 +241,6 @@ public class FindingController extends Controller {
         }
 
         return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found")));
-    }
-
-    /*
-    private BrainstormingFinding getBrainstormingFinding(String findingIdentifier) throws ExecutionException, InterruptedException {
-        CompletableFuture<BrainstormingFinding> future = service.getFinding(findingIdentifier);
-        return future.get();
     }
 */
 
