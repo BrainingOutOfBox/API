@@ -1,12 +1,12 @@
-package services;
+package services.database;
 
 import com.mongodb.async.client.MongoCollection;
 import config.MongoDBEngineProvider;
 import models.bo.Participant;
 import play.Logger;
+import services.database.DBParticipantInterface;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.concurrent.CompletableFuture;
 
 import static com.mongodb.client.model.Filters.and;

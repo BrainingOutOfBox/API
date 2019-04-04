@@ -1,14 +1,13 @@
-package services;
+package services.database;
 
 import com.mongodb.async.client.MongoCollection;
-import com.mongodb.client.result.DeleteResult;
 import config.MongoDBEngineProvider;
 import models.bo.BrainstormingTeam;
 import models.bo.Participant;
 import play.Logger;
+import services.database.DBTeamInterface;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;

@@ -2,7 +2,6 @@ package controllers;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.mongodb.client.result.DeleteResult;
 import com.typesafe.config.Config;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,8 +20,7 @@ import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
-import services.MongoDBParticipantService;
-import services.ParticipantService;
+import services.business.ParticipantService;
 
 import javax.inject.Inject;
 import java.io.UnsupportedEncodingException;

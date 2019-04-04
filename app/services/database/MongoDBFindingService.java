@@ -1,4 +1,4 @@
-package services;
+package services.database;
 
 import com.mongodb.async.client.MongoCollection;
 import com.mongodb.client.model.Filters;
@@ -9,9 +9,9 @@ import models.bo.BrainstormingFinding;
 import models.bo.BrainstormingTeam;
 import org.joda.time.DateTime;
 import play.Logger;
+import services.database.DBFindingInterface;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.Arrays;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;

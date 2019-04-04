@@ -1,6 +1,7 @@
-package services;
+package services.business;
 
 import models.bo.Participant;
+import services.database.MongoDBParticipantService;
 
 import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;

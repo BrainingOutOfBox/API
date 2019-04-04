@@ -11,8 +11,7 @@ import parsers.BrainstormingTeamDTOBodyParser;
 import parsers.ParticipantDTOBodyParser;
 import play.libs.Json;
 import play.mvc.*;
-import services.MongoDBTeamService;
-import services.TeamService;
+import services.business.TeamService;
 
 import javax.inject.Inject;
 import java.util.LinkedList;
@@ -25,7 +24,7 @@ public class TeamController extends Controller {
 
     @Inject
     private TeamService service;
-    
+
     @Inject
     private ModelsMapper modelsMapper;
 

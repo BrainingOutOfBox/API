@@ -14,7 +14,8 @@ import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 
-import services.MongoDBFindingService;
+import services.business.FindingService;
+import services.business.TeamService;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -25,7 +26,9 @@ import java.util.concurrent.*;
 public class FindingController extends Controller {
 
     @Inject
-    private MongoDBFindingService service;
+    private FindingService service;
+    @Inject
+    private TeamService teamService;
     @Inject
     private ModelsMapper modelsMapper;
 
@@ -40,8 +43,7 @@ public class FindingController extends Controller {
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     @BodyParser.Of(BrainstormingFindingDTOBodyParser.class)
     public Result createBrainstormingFindingForTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
-        TeamController teamController = new TeamController();
-        BrainstormingTeam team = teamController.getBrainstormingTeam(teamIdentifier);
+        BrainstormingTeam team = teamService.getTeam(teamIdentifier).get();
 
         BrainstormingFindingDTO brainstormingFindingDTO = request().body().as(BrainstormingFindingDTO.class);
 

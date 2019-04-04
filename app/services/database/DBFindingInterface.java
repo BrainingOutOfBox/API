@@ -1,4 +1,4 @@
-package services;
+package services.database;
 
 import models.bo.Brainsheet;
 import models.bo.BrainstormingFinding;
