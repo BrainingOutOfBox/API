@@ -51,20 +51,24 @@ public class ParticipantController extends Controller {
             @ApiResponse(code = 200, message = "OK", response = Participant.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     @BodyParser.Of(ParticipantDTOBodyParser.class)
-    public Result login() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
+    public Result login() {
         ParticipantDTO participantDTO = request().body().as(ParticipantDTO.class);
         Participant participant = modelsMapper.toParticipant(participantDTO);
 
         CompletableFuture<Participant> future = service.getParticipant(participant);
 
-        if (future.get() != null){
-            participantDTO = modelsMapper.toParticipantDTO(future.get());
-            participantDTO.setAccessToken(getSignedToken(participantDTO.getUsername()));
-            return ok(Json.toJson(participantDTO));
+        try {
+            if (future.get() != null){
+                participantDTO = modelsMapper.toParticipantDTO(future.get());
+                participantDTO.setAccessToken(getSignedToken(participantDTO.getUsername()));
+                return ok(Json.toJson(participantDTO));
 
-        } else {
-            Logger.info("Username or password not correct");
-            return forbidden(Json.toJson(new ErrorMessage("Error", "Username or password not correct")));
+            } else {
+                Logger.info("Username or password not correct");
+                return badRequest(Json.toJson(new ErrorMessage("Error", "Username or password not correct")));
+            }
+        } catch (InterruptedException | ExecutionException | UnsupportedEncodingException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
     }
 
@@ -78,18 +82,19 @@ public class ParticipantController extends Controller {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     @BodyParser.Of(ParticipantDTOBodyParser.class)
-    public Result createParticipant() throws ExecutionException, InterruptedException {
-
+    public Result createParticipant() {
         ParticipantDTO participantDTO = request().body().as(ParticipantDTO.class);
         Participant participant = modelsMapper.toParticipant(participantDTO);
-        CompletableFuture<Participant> future = service.getParticipant(participant);
 
-        if (future.get() == null){
-            service.insertParticipant(participant);
-            return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully inserted")));
-        } else {
-            Logger.info("Username already exists");
-            return internalServerError(Json.toJson(new ErrorMessage("Error", "Username already exists")));
+        try {
+            if (service.insertParticipant(participant)){
+                return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully inserted")));
+            } else {
+                Logger.info("Username already exists");
+                return badRequest(Json.toJson(new ErrorMessage("Error", "Username already exists")));
+            }
+        } catch (ExecutionException | InterruptedException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
     }
 
@@ -103,18 +108,29 @@ public class ParticipantController extends Controller {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     @BodyParser.Of(ParticipantDTOBodyParser.class)
-    public Result deleteParticipant() throws ExecutionException, InterruptedException {
-
+    public Result deleteParticipant() {
         ParticipantDTO participantDTO = request().body().as(ParticipantDTO.class);
         Participant participant = modelsMapper.toParticipant(participantDTO);
 
         CompletableFuture<Long> future = service.deleteParticipant(participant);
 
-        if (future.get() > 0){
-            return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully deleted")));
-        } else {
-            return internalServerError(Json.toJson(new ErrorMessage("Error", "No Participant deleted! Is username and password correct?")));
+        try {
+            if (future.get() > 0){
+                return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully deleted")));
+            } else {
+                return badRequest(Json.toJson(new ErrorMessage("Error", "No Participant deleted! Is username and password correct or does the user exist?")));
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
+    }
+
+    public Result requiresJwtViaFilter() {
+        Optional<VerifiedJwt> oVerifiedJwt = request().attrs().getOptional(Attrs.VERIFIED_JWT);
+        return oVerifiedJwt.map(jwt -> {
+            Logger.debug(jwt.toString());
+            return ok(Json.toJson(new SuccessMessage("Success", "access granted via filter")));
+        }).orElse(forbidden(Json.toJson(new ErrorMessage("Error","eh, no verified jwt found"))));
     }
 
     private String getSignedToken(String username) throws UnsupportedEncodingException {
@@ -126,13 +142,5 @@ public class ParticipantController extends Controller {
                 .withClaim("user", username)
                 .withExpiresAt(Date.from(ZonedDateTime.now(ZoneId.systemDefault()).plusMinutes(120).toInstant()))
                 .sign(algorithm);
-    }
-
-    public Result requiresJwtViaFilter() {
-        Optional<VerifiedJwt> oVerifiedJwt = request().attrs().getOptional(Attrs.VERIFIED_JWT);
-        return oVerifiedJwt.map(jwt -> {
-            Logger.debug(jwt.toString());
-            return ok(Json.toJson(new SuccessMessage("Success", "access granted via filter")));
-        }).orElse(forbidden(Json.toJson(new ErrorMessage("Error","eh, no verified jwt found"))));
     }
 }

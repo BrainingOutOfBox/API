@@ -5,6 +5,7 @@ import services.database.MongoDBParticipantService;
 
 import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class ParticipantService {
 
@@ -15,8 +16,15 @@ public class ParticipantService {
         return service.getParticipant(participant.getUsername(),participant.getPassword());
     }
 
-    public void insertParticipant(Participant participant){
-        service.insertParticipant(participant);
+    public boolean insertParticipant(Participant participant) throws ExecutionException, InterruptedException {
+        CompletableFuture<Participant> future = getParticipant(participant);
+
+        if (future.get() == null){
+            service.insertParticipant(participant);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public CompletableFuture<Long> deleteParticipant(Participant participant){
