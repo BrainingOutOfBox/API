@@ -1,6 +1,6 @@
 package models.bo;
 
-public final class Idea {
+public abstract class Idea {
     private String description;
 
     public Idea() {
