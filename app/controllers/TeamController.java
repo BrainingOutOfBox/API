@@ -24,7 +24,6 @@ public class TeamController extends Controller {
 
     @Inject
     private TeamService service;
-
     @Inject
     private ModelsMapper modelsMapper;
 
@@ -48,7 +47,6 @@ public class TeamController extends Controller {
 
         service.insertTeam(brainstormingTeam);
         return ok(Json.toJson(new SuccessMessage("Success", brainstormingTeam.getIdentifier())));
-
     }
 
     @ApiOperation(
@@ -61,19 +59,22 @@ public class TeamController extends Controller {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     @BodyParser.Of(ParticipantDTOBodyParser.class)
-    public Result joinBrainstormingTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
+    public Result joinBrainstormingTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier){
         ParticipantDTO participantDTO = request().body().as(ParticipantDTO.class);
         Participant participant = modelsMapper.toParticipant(participantDTO);
-        BrainstormingTeam brainstormingTeam = getBrainstormingTeam(teamIdentifier);
 
-        if (brainstormingTeam!= null && brainstormingTeam.getNrOfParticipants() > brainstormingTeam.getCurrentNrOfParticipants() && brainstormingTeam.joinTeam(participant)) {
-            service.changeTeamMembers(brainstormingTeam, 1);
-            return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully added to the brainstormingTeam")));
+        try {
+            BrainstormingTeam brainstormingTeam = service.getTeam(teamIdentifier).get();
 
-        } else {
-            return internalServerError(Json.toJson(new ErrorMessage("Error", "The limit of the team size is reached or the participant is already in the brainstormingTeam or this team does not exist")));
+            if (service.joinTeam(brainstormingTeam, participant)) {
+                return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully added to the brainstormingTeam")));
+            } else {
+                return badRequest(Json.toJson(new ErrorMessage("Error", "The limit of the team size is reached or the participant is already in the brainstormingTeam or this team does not exist")));
+            }
+
+        } catch (ExecutionException | InterruptedException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
-
     }
 
     @ApiOperation(
@@ -86,18 +87,21 @@ public class TeamController extends Controller {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     @BodyParser.Of(ParticipantDTOBodyParser.class)
-    public Result leaveBrainstormingTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
+    public Result leaveBrainstormingTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier){
         ParticipantDTO participantDTO = request().body().as(ParticipantDTO.class);
         Participant participant = modelsMapper.toParticipant(participantDTO);
-        BrainstormingTeam brainstormingTeam = getBrainstormingTeam(teamIdentifier);
 
-        if (brainstormingTeam != null && brainstormingTeam.getCurrentNrOfParticipants() > 0 && brainstormingTeam.leaveTeam(participant)) {
+        try {
+            BrainstormingTeam brainstormingTeam = service.getTeam(teamIdentifier).get();
 
-            service.changeTeamMembers(brainstormingTeam, -1);
-            return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully removed from the brainstormingTeam")));
+            if (service.leaveTeam(brainstormingTeam, participant)) {
+                return ok(Json.toJson(new SuccessMessage("Success", "Participant successfully removed from the brainstormingTeam")));
+            } else {
+                return badRequest(Json.toJson(new ErrorMessage("Error", "There are no more participants in the brainstormingTeam or the participant has already left the brainstormingTeam or this team does not exist")));
+            }
 
-        } else {
-            return internalServerError(Json.toJson(new ErrorMessage("Error", "There are no more participants in the brainstormingTeam or the participant has already left the brainstormingTeam or this team does not exist")));
+        } catch (ExecutionException | InterruptedException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
     }
 
@@ -111,16 +115,22 @@ public class TeamController extends Controller {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     @BodyParser.Of(BrainstormingTeamDTOBodyParser.class)
-    public Result deleteBrainstormingTeam() throws ExecutionException, InterruptedException {
+    public Result deleteBrainstormingTeam() {
         BrainstormingTeamDTO brainstormingTeamDTO = request().body().as(BrainstormingTeamDTO.class);
         BrainstormingTeam brainstormingTeam = modelsMapper.toBrainstormingTeam(brainstormingTeamDTO);
 
         CompletableFuture<Long> future = service.deleteTeam(brainstormingTeam);
 
-        if (future.get() > 0){
-            return ok(Json.toJson(new SuccessMessage("Success", "Team successfully deleted")));
-        } else {
-            return internalServerError(Json.toJson(new ErrorMessage("Error", "No Team deleted! Does the identifier exist and is moderator's username and password correct?")));
+        try {
+
+            if (future.get() > 0){
+                return ok(Json.toJson(new SuccessMessage("Success", "Team successfully deleted")));
+            } else {
+                return badRequest(Json.toJson(new ErrorMessage("Error", "No Team deleted! Does the identifier exist and is moderator's username and password correct?")));
+            }
+
+        } catch (InterruptedException | ExecutionException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
     }
 
@@ -134,17 +144,26 @@ public class TeamController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = BrainstormingTeam.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result getBrainstormingTeamForParticipant(@ApiParam(value = "Participant username", name = "username", required = true) String username) throws ExecutionException, InterruptedException {
+    public Result getBrainstormingTeamForParticipant(@ApiParam(value = "Participant username", name = "username", required = true) String username) {
         Participant participant = new Participant();
         participant.setUsername(username);
 
         CompletableFuture<Queue<BrainstormingTeam>> future = service.getAllTeamsOfParticipant(participant);
         Queue<BrainstormingTeamDTO> list = new LinkedList<>();
-        for (BrainstormingTeam brainstormingTeam : future.get()) {
-            BrainstormingTeamDTO brainstormingTeamDTO = modelsMapper.tobrainstormingTeamDTO(brainstormingTeam);
-            list.add(brainstormingTeamDTO);
+
+        try {
+
+            for (BrainstormingTeam brainstormingTeam : future.get()) {
+                BrainstormingTeamDTO brainstormingTeamDTO = modelsMapper.tobrainstormingTeamDTO(brainstormingTeam);
+                list.add(brainstormingTeamDTO);
+            }
+
+            return ok(Json.toJson(list));
+
+        } catch (InterruptedException | ExecutionException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
-        return ok(Json.toJson(list));
+
     }
 
     @ApiOperation(
@@ -156,20 +175,20 @@ public class TeamController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = BrainstormingTeam.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result getBrainstormingTeamByIdentifier(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
-        BrainstormingTeam team = getBrainstormingTeam(teamIdentifier);
+    public Result getBrainstormingTeamByIdentifier(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) {
+        try {
+            BrainstormingTeam team = service.getTeam(teamIdentifier).get();
 
-        if (team != null) {
-            BrainstormingTeamDTO brainstormingTeamDTO = modelsMapper.tobrainstormingTeamDTO(team);
-            return ok(Json.toJson(brainstormingTeamDTO));
-        } else {
-            return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam found")));
+            if (team != null) {
+                BrainstormingTeamDTO brainstormingTeamDTO = modelsMapper.tobrainstormingTeamDTO(team);
+                return ok(Json.toJson(brainstormingTeamDTO));
+            } else {
+                return badRequest(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam found")));
+            }
+
+        } catch (InterruptedException | ExecutionException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
-    }
-
-    BrainstormingTeam getBrainstormingTeam(String teamIdentifier) throws ExecutionException, InterruptedException {
-        CompletableFuture<BrainstormingTeam> future = service.getTeam(teamIdentifier);
-        return future.get();
     }
 
 }

@@ -2,6 +2,7 @@ package services.business;
 
 import models.bo.BrainstormingTeam;
 import models.bo.Participant;
+import services.database.MongoDBParticipantService;
 import services.database.MongoDBTeamService;
 
 import javax.inject.Inject;
@@ -12,10 +13,10 @@ public class TeamService {
 
     @Inject
     private MongoDBTeamService service;
+    @Inject
+    private MongoDBParticipantService participantService;
 
-    public void insertTeam(BrainstormingTeam team){
-        service.insertTeam(team);
-    }
+    public void insertTeam(BrainstormingTeam team){ service.insertTeam(team); }
 
     public CompletableFuture<Long> deleteTeam(BrainstormingTeam team){
         return service.deleteTeam(team);
@@ -29,7 +30,21 @@ public class TeamService {
         return service.getTeam(id);
     }
 
-    public void changeTeamMembers(BrainstormingTeam team, Number number){
-        service.changeTeamMembers(team, number);
+    public boolean joinTeam(BrainstormingTeam brainstormingTeam, Participant participant){
+        if (brainstormingTeam!= null && brainstormingTeam.getNrOfParticipants() > brainstormingTeam.getCurrentNrOfParticipants() && brainstormingTeam.joinTeam(participant)) {
+            service.changeTeamMembers(brainstormingTeam, 1);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean leaveTeam(BrainstormingTeam brainstormingTeam, Participant participant){
+        if (brainstormingTeam != null && brainstormingTeam.getCurrentNrOfParticipants() > 0 && brainstormingTeam.leaveTeam(participant)) {
+            service.changeTeamMembers(brainstormingTeam, -1);
+            return true;
+        } else {
+            return false;
+        }
     }
 }
