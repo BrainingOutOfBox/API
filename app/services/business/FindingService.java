@@ -150,7 +150,7 @@ public class FindingService {
 
         //creating ideas
         for (int k = 0; k < brainstormingFindingDTO.getNrOfIdeas(); k++){
-            ideas.add(new Idea(""));
+            ideas.add(new NoteIdea(""));
         }
         //creating brainwaves
         for (int j = 0; j < team.getNrOfParticipants(); j++){
