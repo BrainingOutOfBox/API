@@ -1,11 +1,13 @@
 package services.database;
 
+import com.google.inject.ImplementedBy;
 import models.bo.BrainstormingTeam;
 import models.bo.Participant;
 
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 
+@ImplementedBy(MongoDBTeamService.class)
 public interface DBTeamInterface {
 
     CompletableFuture<BrainstormingTeam> getTeam(String id);

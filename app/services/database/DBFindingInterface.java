@@ -1,5 +1,6 @@
 package services.database;
 
+import com.google.inject.ImplementedBy;
 import models.bo.Brainsheet;
 import models.bo.BrainstormingFinding;
 import models.bo.BrainstormingTeam;
@@ -7,6 +8,7 @@ import models.bo.BrainstormingTeam;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 
+@ImplementedBy(MongoDBFindingService.class)
 public interface DBFindingInterface {
 
     CompletableFuture<BrainstormingFinding> getFinding(String id);

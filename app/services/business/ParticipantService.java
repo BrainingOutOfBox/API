@@ -1,7 +1,7 @@
 package services.business;
 
 import models.bo.Participant;
-import services.database.MongoDBParticipantService;
+import services.database.DBParticipantInterface;
 
 import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;
@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutionException;
 public class ParticipantService {
 
     @Inject
-    private MongoDBParticipantService service;
+    private DBParticipantInterface service;
 
     public CompletableFuture<Participant> getParticipant(Participant participant){
         return service.getParticipant(participant.getUsername(),participant.getPassword());

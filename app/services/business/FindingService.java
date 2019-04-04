@@ -4,8 +4,8 @@ import mappers.ModelsMapper;
 import models.bo.*;
 import models.dto.BrainstormingFindingDTO;
 import org.joda.time.DateTime;
-import services.database.MongoDBFindingService;
-import services.database.MongoDBTeamService;
+import services.database.DBFindingInterface;
+import services.database.DBTeamInterface;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -14,13 +14,13 @@ import java.util.TimerTask;
 import java.util.concurrent.*;
 
 public class FindingService {
-
     @Inject
-    private MongoDBFindingService service;
+    private DBFindingInterface service;
     @Inject
-    private MongoDBTeamService teamService;
+    private DBTeamInterface teamService;
     @Inject
     private ModelsMapper modelsMapper;
+
 
     public String insertFinding(BrainstormingFindingDTO brainstormingFindingDTO, String teamIdentifier) throws ExecutionException, InterruptedException {
         BrainstormingTeam team = teamService.getTeam(teamIdentifier).get();

@@ -2,8 +2,7 @@ package services.business;
 
 import models.bo.BrainstormingTeam;
 import models.bo.Participant;
-import services.database.MongoDBParticipantService;
-import services.database.MongoDBTeamService;
+import services.database.DBTeamInterface;
 
 import javax.inject.Inject;
 import java.util.Queue;
@@ -12,9 +11,7 @@ import java.util.concurrent.CompletableFuture;
 public class TeamService {
 
     @Inject
-    private MongoDBTeamService service;
-    @Inject
-    private MongoDBParticipantService participantService;
+    private DBTeamInterface service;
 
     public void insertTeam(BrainstormingTeam team){ service.insertTeam(team); }
 
