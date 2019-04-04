@@ -5,7 +5,9 @@ import com.mongodb.async.client.MongoClient;
 import com.mongodb.async.client.MongoClients;
 import com.mongodb.async.client.MongoDatabase;
 import com.typesafe.config.Config;
+import models.bo.*;
 import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.PojoCodecProvider;
 
 import javax.inject.Inject;
@@ -30,7 +32,21 @@ public class MongoDBEngineProvider {
         String password = config.getString("db.mongo.password");
         String db = config.getString("db.mongo.database");
 
-        pojoCodecRegistry = fromRegistries(MongoClients.getDefaultCodecRegistry(), fromProviders(PojoCodecProvider.builder().automatic(true).build()));
+        ClassModel<Idea> ideaClassModel = ClassModel.builder(Idea.class).enableDiscriminator(true).build();
+        ClassModel<NoteIdea> noteIdeaClassModel = ClassModel.builder(NoteIdea.class).enableDiscriminator(true).build();
+        ClassModel<SketchIdea> sketchIdeaClassModel = ClassModel.builder(SketchIdea.class).enableDiscriminator(true).build();
+        ClassModel<PatternIdea> patternIdeaClassModel = ClassModel.builder(PatternIdea.class).enableDiscriminator(true).build();
+
+        ClassModel<Brainwave> brainwaveClassModel = ClassModel.builder(Brainwave.class).build();
+        ClassModel<Brainsheet> brainsheetClassModel = ClassModel.builder(Brainsheet.class).build();
+        ClassModel<BrainstormingFinding> brainstormingFindingClassModel = ClassModel.builder(BrainstormingFinding.class).build();
+
+        ClassModel<Participant> participantClassModel = ClassModel.builder(Participant.class).build();
+        ClassModel<BrainstormingTeam> teamClassModel = ClassModel.builder(BrainstormingTeam.class).build();
+
+        PojoCodecProvider pojoCodecProvider = PojoCodecProvider.builder().register(ideaClassModel, noteIdeaClassModel, sketchIdeaClassModel, patternIdeaClassModel, brainwaveClassModel, brainsheetClassModel, brainstormingFindingClassModel, participantClassModel, teamClassModel).build();
+
+        pojoCodecRegistry = fromRegistries(MongoClients.getDefaultCodecRegistry(), fromProviders(pojoCodecProvider));
         mongoClient = MongoClients.create(new ConnectionString("mongodb://"+user+":"+password+"@"+url+":"+port+"/?authSource=admin&authMechanism=SCRAM-SHA-1"));
 
         database = mongoClient.getDatabase(db);
