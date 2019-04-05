@@ -1,25 +1,26 @@
-package models;
+package models.dto;
 
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
-public final class BrainstormingTeam {
+public final class BrainstormingTeamDTO {
     private ObjectId id;
     private String identifier;
     private String name;
     private String purpose;
     private int nrOfParticipants;
     private int currentNrOfParticipants;
-    private ArrayList<Participant> participants;
-    private Participant moderator;
+    private ArrayList<ParticipantDTO> participants;
+    private ParticipantDTO moderator;
 
-    public BrainstormingTeam() {
-
+    public BrainstormingTeamDTO() {
+        this.identifier = UUID.randomUUID().toString();
+        this.participants = new ArrayList<>();
     }
 
-    public BrainstormingTeam(String name, String purpose, int nrOfParticipants, int currentNrOfParticipants, ArrayList<Participant> participants, Participant moderator) {
+    public BrainstormingTeamDTO(String name, String purpose, int nrOfParticipants, int currentNrOfParticipants, ArrayList<ParticipantDTO> participants, ParticipantDTO moderator) {
         this.identifier = UUID.randomUUID().toString();
         this.name = name;
         this.purpose = purpose;
@@ -77,45 +78,20 @@ public final class BrainstormingTeam {
         this.currentNrOfParticipants = currentNrOfParticipants;
     }
 
-    public ArrayList<Participant> getParticipants() {
+    public ArrayList<ParticipantDTO> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(ArrayList<Participant> participants) {
+    public void setParticipants(ArrayList<ParticipantDTO> participants) {
         this.participants = participants;
     }
 
-    public Participant getModerator() {
+    public ParticipantDTO getModerator() {
         return moderator;
     }
 
-    public void setModerator(Participant moderator) {
+    public void setModerator(ParticipantDTO moderator) {
         this.moderator = moderator;
     }
 
-    public boolean joinTeam(Participant participant){
-        if (contains(participant) == -1) {
-            this.participants.add(participant);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean leaveTeam(Participant participant){
-        int participantAtIndex = contains(participant);
-        if (participantAtIndex > -1) {
-            this.participants.remove(participantAtIndex);
-            return true;
-        }
-        return false;
-    }
-
-    public int contains(Participant participant){
-        for (int i = 0; i < participants.size(); i++){
-            if (participants.get(i).getUsername().equals(participant.getUsername())){
-                return i;
-            }
-        }
-        return -1;
-    }
 }

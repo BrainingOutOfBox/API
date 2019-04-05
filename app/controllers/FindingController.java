@@ -1,31 +1,22 @@
 package controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.mongodb.Block;
-import com.mongodb.ConnectionString;
-import com.mongodb.async.SingleResultCallback;
-import com.mongodb.async.client.MongoClient;
-import com.mongodb.async.client.MongoClients;
-import com.mongodb.async.client.MongoCollection;
-import com.mongodb.async.client.MongoDatabase;
-import static com.mongodb.client.model.Filters.*;
-import static com.mongodb.client.model.Updates.*;
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
-
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.PushOptions;
-import com.mongodb.client.result.UpdateResult;
 import io.swagger.annotations.*;
+import mappers.ModelsMapper;
 import models.*;
-import org.bson.codecs.configuration.CodecRegistry;
-import org.bson.codecs.pojo.PojoCodecProvider;
+import models.bo.*;
+import models.dto.BrainsheetDTO;
+import models.dto.BrainstormingFindingDTO;
 import org.joda.time.DateTime;
-import play.Logger;
+import parsers.BrainsheetDTOBodyParser;
+import parsers.BrainstormingFindingDTOBodyParser;
 import play.libs.Json;
+import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 
+import services.business.FindingService;
+
+import javax.inject.Inject;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -33,21 +24,10 @@ import java.util.concurrent.*;
 @Api(value = "/BrainstormingFinding", description = "All operations with brainstormingFindings", produces = "application/json")
 public class FindingController extends Controller {
 
-    private MongoClient mongoClient;
-    private MongoDatabase database;
-    CodecRegistry pojoCodecRegistry;
-    MongoCollection<BrainstormingFinding> findingCollection;
-
-
-    public FindingController(){
-        pojoCodecRegistry = fromRegistries(MongoClients.getDefaultCodecRegistry(), fromProviders(PojoCodecProvider.builder().automatic(true).build()));
-        mongoClient = MongoClients.create(new ConnectionString("mongodb://play:Methode746@localhost:40002/?authSource=admin&authMechanism=SCRAM-SHA-1"));
-
-        database = mongoClient.getDatabase("Test");
-        database = database.withCodecRegistry(pojoCodecRegistry);
-
-        findingCollection = database.getCollection("BrainstormingFinding", BrainstormingFinding.class);
-    }
+    @Inject
+    private FindingService service;
+    @Inject
+    private ModelsMapper modelsMapper;
 
     @ApiOperation(
             nickname = "createBrainstormingFinding",
@@ -58,38 +38,24 @@ public class FindingController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result createBrainstormingFindingForTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
+    @BodyParser.Of(BrainstormingFindingDTOBodyParser.class)
+    public Result createBrainstormingFindingForTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier){
+        BrainstormingFindingDTO brainstormingFindingDTO = request().body().as(BrainstormingFindingDTO.class);
 
-        JsonNode body = request().body().asJson();
+        try {
+            String identifier = service.insertFinding(brainstormingFindingDTO, teamIdentifier);
 
-        if (body == null ) {
-            return forbidden(Json.toJson(new ErrorMessage("Error", "json body is null")));
-        } else if(  body.hasNonNull("name") &&
-                    body.hasNonNull("problemDescription") &&
-                    body.hasNonNull("nrOfIdeas") &&
-                    body.hasNonNull("baseRoundTime")) {
-
-            TeamController teamController = new TeamController();
-            BrainstormingTeam team = teamController.getBrainstormingTeam(teamIdentifier);
-            BrainstormingFinding finding;
-            if (team != null) {
-                finding = createBrainstormingFinding(body, team);
-
-                findingCollection.insertOne(finding, new SingleResultCallback<Void>() {
-                    @Override
-                    public void onResult(Void result, Throwable t) {
-                        Logger.info("Inserted BrainstormFinding");
-                    }
-                });
+            if (identifier != null) {
+                return ok(Json.toJson(new SuccessMessage("Success", identifier)));
             } else {
-                return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam with this identifier found")));
+                return badRequest(Json.toJson(new ErrorMessage("Error", "No brainstormingTeam with this identifier found")));
             }
 
-        return ok(Json.toJson(new SuccessMessage("Success", finding.getIdentifier())));
+        } catch (ExecutionException | InterruptedException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
-
-        return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
     }
+
 
 
     @ApiOperation(
@@ -101,26 +67,26 @@ public class FindingController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = BrainstormingFinding.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result getBrainstormingFindingFromTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier) throws ExecutionException, InterruptedException {
+    public Result getBrainstormingFindingFromTeam(@ApiParam(value = "BrainstormingTeam Identifier", name = "teamIdentifier", required = true) String teamIdentifier){
+        BrainstormingTeam team = new BrainstormingTeam();
+        team.setIdentifier(teamIdentifier);
 
-        CompletableFuture<Queue<BrainstormingFinding>> future = new CompletableFuture<>();
-        Queue<BrainstormingFinding> queue = new ConcurrentLinkedQueue<>();
+        CompletableFuture<Queue<BrainstormingFinding>> future = service.getAllFindingsOfTeam(team);
+        Queue<BrainstormingFindingDTO> list = new LinkedList<>();
 
-        findingCollection.find(eq("brainstormingTeam", teamIdentifier)).forEach(
-            new Block<BrainstormingFinding>() {
-                @Override
-                public void apply(final BrainstormingFinding finding) {
-                    queue.add(finding);
-                }
-            }, new SingleResultCallback<Void>() {
-                @Override
-                public void onResult(final Void result, final Throwable t) {
-                    Logger.info("Get all BrainstormFindings for team");
-                    future.complete(queue);
-                }
-            });
+        try {
 
-        return ok(Json.toJson(future.get()));
+            for (BrainstormingFinding brainstormingFinding : future.get()) {
+                BrainstormingFindingDTO brainstormingFindingDTO = modelsMapper.toBrainstormingFindingDTO(brainstormingFinding);
+                list.add(brainstormingFindingDTO);
+            }
+
+            return ok(Json.toJson(list));
+
+        } catch (InterruptedException | ExecutionException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
+        }
+
     }
 
     @ApiOperation(
@@ -132,14 +98,20 @@ public class FindingController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = BrainstormingFinding.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result getBrainstormingFindingByIdentifier(@ApiParam(value = "BrainstormingFinding Identifier", name = "findingIdentifier", required = true) String findingIdentifier) throws ExecutionException, InterruptedException {
+    public Result getBrainstormingFindingByIdentifier(@ApiParam(value = "BrainstormingFinding Identifier", name = "findingIdentifier", required = true) String findingIdentifier){
+        try {
 
-        BrainstormingFinding finding = getBrainstormingFinding(findingIdentifier);
+            BrainstormingFinding finding = service.getFinding(findingIdentifier).get();
 
-        if (finding != null) {
-            return ok(Json.toJson(finding));
-        } else {
-            return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found")));
+            if (finding != null) {
+                BrainstormingFindingDTO brainstormingFindingDTO = modelsMapper.toBrainstormingFindingDTO(finding);
+                return ok(Json.toJson(brainstormingFindingDTO));
+            } else {
+                return badRequest(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found")));
+            }
+
+        } catch (InterruptedException | ExecutionException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
     }
 
@@ -152,45 +124,42 @@ public class FindingController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result putBrainsheet(@ApiParam(value = "BrainstormingFinding Identifier", name = "findingIdentifier", required = true) String findingIdentifier) throws ExecutionException, InterruptedException {
+    @BodyParser.Of(BrainsheetDTOBodyParser.class)
+    public Result putBrainsheet(@ApiParam(value = "BrainstormingFinding Identifier", name = "findingIdentifier", required = true) String findingIdentifier){
+        BrainsheetDTO brainsheetDTO = request().body().as(BrainsheetDTO.class);
+        Brainsheet newBrainsheet = modelsMapper.toBrainsheet(brainsheetDTO);
 
-        JsonNode body = request().body().asJson();
-        JsonNode brainwaves = body.findPath("brainwaves");
-        JsonNode nrOfSheet = body.findPath("nrOfSheet");
+        try {
 
-        if (body == null ) {
-            return forbidden(Json.toJson(new ErrorMessage("Error", "json body is null")));
-        } else if(  !brainwaves.isNull() &&
-                    !nrOfSheet.isNull()){
-
-            BrainstormingFinding finding = getBrainstormingFinding(findingIdentifier);
-
-            if (finding == null){
-                return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found")));
+            if (service.exchangeBrainsheet(findingIdentifier, newBrainsheet)) {
+                return ok(Json.toJson(new SuccessMessage("Success", "Brainsheet successfully updated")));
+            } else {
+                return badRequest(Json.toJson(new ErrorMessage("Error", "No Brainsheet updated")));
             }
 
-            Brainsheet oldBrainsheet = finding.getBrainsheets().get(nrOfSheet.asInt());
-            Brainsheet newBrainsheet = createBrainsheet(body);
-
-
-            findingCollection.updateOne(eq("identifier", findingIdentifier),pullByFilter(Filters.eq("brainsheets", oldBrainsheet)), new SingleResultCallback<UpdateResult>() {
-                @Override
-                public void onResult(final UpdateResult result, final Throwable t) {
-                    Logger.info(result.getModifiedCount() + " Brainsheet successfully deleted");
-                }
-            });
-
-            findingCollection.updateOne(eq("identifier", findingIdentifier),combine(pushEach("brainsheets", Arrays.asList(newBrainsheet), new PushOptions().position(newBrainsheet.getNrOfSheet())), inc("deliveredBrainsheetsInCurrentRound", 1)), new SingleResultCallback<UpdateResult>() {
-                @Override
-                public void onResult(final UpdateResult result, final Throwable t) {
-                    Logger.info(result.getModifiedCount() + " Brainsheet successfully inserted");
-                }
-            });
-
-            return ok(Json.toJson(new SuccessMessage("Success", "Brainsheet successfully updated")));
+        } catch (ExecutionException | InterruptedException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
+    }
 
-        return forbidden(Json.toJson(new ErrorMessage("Error", "json body not as expected")));
+    @ApiOperation(
+            nickname = "calculateRemainingTime",
+            value = "Calculate remaining time",
+            notes = "With this method you can calculate the remaining time of the current round in the selected BrainstormFinding",
+            httpMethod = "GET",
+            response = SuccessMessage.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
+            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    public Result calculateRemainingTimeOfFinding(@ApiParam(value = "BrainstormingFinding Identifier", name = "findingIdentifier", required = true) String findingIdentifier){
+        try {
+
+            long difference = service.calculateRemainingTimeOfFinding(findingIdentifier);
+            return ok(Json.toJson(difference));
+
+        } catch (ExecutionException | InterruptedException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
+        }
     }
 
     @ApiOperation(
@@ -202,16 +171,19 @@ public class FindingController extends Controller {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
-    public Result startBrainstorming(String findingIdentifier) throws ExecutionException, InterruptedException {
-        BrainstormingFinding finding = getBrainstormingFinding(findingIdentifier);
-        if(finding != null && finding.getCurrentRound() == 0) {
-            startWatcherForBrainstormingFinding(finding.getIdentifier());
-            return nextRound(finding);
+    public Result startBrainstorming(String findingIdentifier){
+        try {
+            if(service.startBrainstorming(findingIdentifier)) {
+                return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingFinding successfully started")));
+            } else {
+                return badRequest(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found or brainstormingFinding has already started or ended")));
+            }
+        } catch (ExecutionException | InterruptedException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
-        return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found or brainstormingFinding has already started or ended")));
     }
 
-    private void startWatcherForBrainstormingFinding(String findingIdentifier){
+    /*private void startWatcherForBrainstormingFinding(String findingIdentifier){
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         TimerTask task = new TimerTask() {
             @Override
@@ -220,12 +192,12 @@ public class FindingController extends Controller {
                     BrainstormingFinding finding = getBrainstormingFinding(findingIdentifier);
                     DateTime endDateTime = DateTime.parse(finding.getCurrentRoundEndTime());
 
-                    /*
+                    *//*
                     System.out.println("Task started for " + finding.getIdentifier());
                     System.out.println(finding.getIdentifier() + "_Delivered Sheets: " + finding.getDeliveredBrainsheetsInCurrentRound());
                     System.out.println(finding.getIdentifier() + "_End Time " + finding.getCurrentRoundEndTime());
                     System.out.println(finding.getIdentifier() + "_Currend Round: " + finding.getCurrentRound());
-                    */
+                    *//*
 
 
                     if (endDateTime.plusSeconds(30).isBeforeNow() ||
@@ -244,120 +216,32 @@ public class FindingController extends Controller {
                     //System.out.println("cancel");
                     cancel();
 
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
+                } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         };
 
         executor.scheduleAtFixedRate(task, 1000L, 5000L, TimeUnit.MILLISECONDS);
-    }
-
-    private Result nextRound(BrainstormingFinding finding) throws ExecutionException, InterruptedException {
+    }*/
+/*
+    private Result nextRound(BrainstormingFinding finding){
         if (finding != null) {
-
-            findingCollection.updateOne(eq("identifier", finding.getIdentifier()), combine(set("currentRoundEndTime", new DateTime().plusMinutes(finding.getBaseRoundTime()+finding.getCurrentRound()).toString()), inc("currentRound", 1), set("deliveredBrainsheetsInCurrentRound", 0)), new SingleResultCallback<UpdateResult>() {
-                @Override
-                public void onResult(final UpdateResult result, final Throwable t) {
-                    Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated");
-                }
-            });
-
+            service.nextRound(finding);
             return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingFinding successfully updated")));
         }
 
         return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found")));
     }
 
-    private Result lastRound(BrainstormingFinding finding) throws ExecutionException, InterruptedException {
+    private Result lastRound(BrainstormingFinding finding){
         if (finding != null) {
-
-            findingCollection.updateOne(eq("identifier", finding.getIdentifier()), set("currentRound", -1), new SingleResultCallback<UpdateResult>() {
-                @Override
-                public void onResult(final UpdateResult result, final Throwable t) {
-                    Logger.info(result.getModifiedCount() + " BrainstormingFinding successfully updated");
-                }
-            });
-
+            service.lastRound(finding);
             return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingFinding successfully updated")));
         }
 
         return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found")));
     }
-
-    private BrainstormingFinding getBrainstormingFinding(String findingIdentifier) throws ExecutionException, InterruptedException {
-
-        CompletableFuture<BrainstormingFinding> future = new CompletableFuture<>();
-
-        findingCollection.find(eq("identifier", findingIdentifier)).first(new SingleResultCallback<BrainstormingFinding>() {
-            @Override
-            public void onResult(BrainstormingFinding result, Throwable t) {
-                Logger.info("Get BrainstormingFinding by identifier");
-                future.complete(result);
-            }
-        });
-
-        return future.get();
-    }
-
-    private Brainsheet createBrainsheet(JsonNode body){
-        JsonNode brainwaves = body.findPath("brainwaves");
-        JsonNode nrOfSheet = body.findPath("nrOfSheet");
-
-        Brainsheet brainsheet = new Brainsheet();
-
-        for (JsonNode wave : brainwaves){
-            JsonNode ideas = wave.findPath("ideas");
-            Brainwave brainwave = new Brainwave();
-
-            for (JsonNode idea : ideas){
-                brainwave.addIdea(new Idea(idea.findPath("description").asText()));
-            }
-
-            brainwave.setNrOfBrainwave(wave.findPath("nrOfBrainwave").asInt());
-            brainsheet.addBrainwave(brainwave);
-        }
-
-        brainsheet.setNrOfSheet(nrOfSheet.asInt());
-
-        return brainsheet;
-    }
-
-    private BrainstormingFinding createBrainstormingFinding(JsonNode body, BrainstormingTeam team) {
-
-        ArrayList<Brainsheet> brainsheets = new ArrayList<>();
-        ArrayList<Brainwave> brainwaves = new ArrayList<>();
-        ArrayList<Idea> ideas = new ArrayList<>();
-
-        //creating ideas
-        for (int k = 0; k < body.get("nrOfIdeas").asInt(); k++){
-            ideas.add(new Idea(""));
-        }
-        //creating brainwaves
-        for (int j = 0; j < team.getNrOfParticipants(); j++){
-
-            brainwaves.add(new Brainwave(j, ideas));
-        }
-        //creating brainsheets
-        for(int i = 0; i < team.getNrOfParticipants(); i++){
-
-            brainsheets.add(new Brainsheet(i, brainwaves));
-        }
-
-        BrainstormingFinding finding = new BrainstormingFinding(
-                body.get("name").asText(),
-                body.get("problemDescription").asText(),
-                body.get("nrOfIdeas").asInt(),
-                body.get("baseRoundTime").asInt(),
-                0,
-                "",
-                brainsheets,
-                0,
-                team.getIdentifier());
-
-        return finding;
-    }
+*/
 
 }
