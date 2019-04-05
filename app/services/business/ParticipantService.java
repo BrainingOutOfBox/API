@@ -9,8 +9,12 @@ import java.util.concurrent.ExecutionException;
 
 public class ParticipantService {
 
-    @Inject
     private DBParticipantInterface service;
+
+    @Inject
+    public ParticipantService(DBParticipantInterface service) {
+        this.service = service;
+    }
 
     public CompletableFuture<Participant> getParticipant(Participant participant){
         return service.getParticipant(participant.getUsername(),participant.getPassword());
