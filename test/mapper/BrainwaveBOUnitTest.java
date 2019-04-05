@@ -1,11 +1,11 @@
 package mapper;
 
 
+import mappers.ModelsMapper;
 import models.bo.*;
 import models.dto.*;
 import org.junit.Before;
 import org.junit.Test;
-import org.modelmapper.ModelMapper;
 
 import java.util.ArrayList;
 
@@ -14,31 +14,14 @@ import static org.junit.Assert.assertTrue;
 
 public class BrainwaveBOUnitTest {
 
-    private ModelMapper modelMapper = new ModelMapper();
+    private ModelsMapper modelsMapper;
+
 
     @Before
     public void setUp() {
-        modelMapper.createTypeMap(Idea.class, IdeaDTO.class)
-                .include(NoteIdea.class, IdeaDTO.class)
-                .include(SketchIdea.class, IdeaDTO.class)
-                .include(PatternIdea.class, PatternIdeaDTO.class);
-
-        modelMapper.typeMap(NoteIdea.class, IdeaDTO.class).setProvider(request -> {
-            NoteIdea idea = (NoteIdea)request.getSource();
-            return new NoteIdeaDTO(idea.getDescription());
-        });
-
-        modelMapper.typeMap(SketchIdea.class, IdeaDTO.class).setProvider(request -> {
-            SketchIdea idea = (SketchIdea)request.getSource();
-            return new SketchIdeaDTO(idea.getDescription(), idea.getPictureId());
-        });
-
-        modelMapper.typeMap(PatternIdea.class, IdeaDTO.class).setProvider(request -> {
-            PatternIdea idea = (PatternIdea)request.getSource();
-            return new PatternIdeaDTO(idea.getDescription(), idea.getProblem(), idea.getSolution(), idea.getUrl(), idea.getCategory(), idea.getPictureId());
-        });
-
+        modelsMapper = new ModelsMapper();
     }
+
 
     @Test
     public void noteIdeaTest() {
@@ -47,7 +30,7 @@ public class BrainwaveBOUnitTest {
         list.add(new NoteIdea("Demo2"));
         Brainwave brainwave = new Brainwave(3, list);
 
-        BrainwaveDTO brainwaveDTO = modelMapper.map(brainwave, BrainwaveDTO.class);
+        BrainwaveDTO brainwaveDTO = modelsMapper.toBrainwaveDTO(brainwave);
 
 
         NoteIdeaDTO noteIdeaDTO = (NoteIdeaDTO) brainwaveDTO.getIdeas().get(0);
@@ -66,7 +49,7 @@ public class BrainwaveBOUnitTest {
         list.add(new SketchIdea("Demo2", "56789"));
         Brainwave brainwave = new Brainwave(3, list);
 
-        BrainwaveDTO brainwaveDTO = modelMapper.map(brainwave, BrainwaveDTO.class);
+        BrainwaveDTO brainwaveDTO = modelsMapper.toBrainwaveDTO(brainwave);
 
 
         SketchIdeaDTO sketchIdeaDTO = (SketchIdeaDTO) brainwaveDTO.getIdeas().get(0);
@@ -86,7 +69,7 @@ public class BrainwaveBOUnitTest {
         list.add(new PatternIdea("Demo2", "DemoProblem2", "DemoSolution2", "www.microservice-api-patterns.org", "software", "56789"));
         Brainwave brainwave = new Brainwave(3, list);
 
-        BrainwaveDTO brainwaveDTO = modelMapper.map(brainwave, BrainwaveDTO.class);
+        BrainwaveDTO brainwaveDTO = modelsMapper.toBrainwaveDTO(brainwave);
 
 
         PatternIdeaDTO patternIdeaDTO = (PatternIdeaDTO) brainwaveDTO.getIdeas().get(0);
@@ -110,7 +93,7 @@ public class BrainwaveBOUnitTest {
         list.add(new PatternIdea("Demo","DemoProblem", "DemoSolution", "www.microservice-api-patterns.org", "software", "01234"));
         Brainwave brainwave = new Brainwave(3, list);
 
-        BrainwaveDTO brainwaveDTO = modelMapper.map(brainwave, BrainwaveDTO.class);
+        BrainwaveDTO brainwaveDTO = modelsMapper.toBrainwaveDTO(brainwave);
 
         assertEquals(3, brainwaveDTO.getIdeas().size());
         assertTrue(brainwaveDTO.getIdeas().get(0) instanceof NoteIdeaDTO);
