@@ -14,13 +14,17 @@ import java.util.TimerTask;
 import java.util.concurrent.*;
 
 public class FindingService {
-    @Inject
+
     private DBFindingInterface service;
-    @Inject
     private DBTeamInterface teamService;
-    @Inject
     private ModelsMapper modelsMapper;
 
+    @Inject
+    public FindingService(DBFindingInterface service, DBTeamInterface teamService, ModelsMapper modelsMapper) {
+        this.service = service;
+        this.teamService = teamService;
+        this.modelsMapper = modelsMapper;
+    }
 
     public String insertFinding(BrainstormingFindingDTO brainstormingFindingDTO, String teamIdentifier) throws ExecutionException, InterruptedException {
         BrainstormingTeam team = teamService.getTeam(teamIdentifier).get();
