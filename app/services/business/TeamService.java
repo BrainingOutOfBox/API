@@ -10,8 +10,12 @@ import java.util.concurrent.CompletableFuture;
 
 public class TeamService {
 
-    @Inject
     private DBTeamInterface service;
+
+    @Inject
+    public TeamService(DBTeamInterface service) {
+        this.service = service;
+    }
 
     public void insertTeam(BrainstormingTeam team){ service.insertTeam(team); }
 

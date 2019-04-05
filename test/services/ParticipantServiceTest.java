@@ -24,15 +24,8 @@ public class ParticipantServiceTest {
         testParticipant = new Participant("TestParticipant", "MirEgal", "Max", "Mustermann");
     }
 
-
     @Test
-    public void entireParticipantTest(){
-        createParticipantTest();
-        getParticipant();
-        deleteParticipant();
-    }
-
-    private void createParticipantTest(){
+    public void createParticipantTest(){
         try {
 
             boolean result = service.insertParticipant(insertParticipant);
@@ -43,7 +36,8 @@ public class ParticipantServiceTest {
         }
     }
 
-    private void getParticipant(){
+    @Test
+    public void getParticipantTest(){
         try {
 
             Participant result = service.getParticipant(testParticipant).get();
@@ -57,7 +51,8 @@ public class ParticipantServiceTest {
         }
     }
 
-    private void deleteParticipant(){
+    @Test
+    public void deleteParticipantTest(){
         try {
 
             long result = service.deleteParticipant(testParticipant).get();
