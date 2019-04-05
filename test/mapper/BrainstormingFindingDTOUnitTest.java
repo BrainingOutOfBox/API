@@ -12,17 +12,17 @@ import static org.junit.Assert.assertEquals;
 
 public class BrainstormingFindingDTOUnitTest {
 
-    private ModelsMapper modelMapper;
+    private ModelsMapper modelsMapper;
 
     @Before
     public void setUp() {
-        modelMapper = new ModelsMapper();
+        modelsMapper = new ModelsMapper();
     }
 
     @Test
     public void dtoToBoTest(){
         BrainstormingFindingDTO brainstormingFindingDTO = createBrainstormingFindingDTO();
-        BrainstormingFinding brainstormingFinding = modelMapper.toBrainstormingFinding(brainstormingFindingDTO);
+        BrainstormingFinding brainstormingFinding = modelsMapper.toBrainstormingFinding(brainstormingFindingDTO);
 
         NoteIdeaDTO noteIdeaDTO = (NoteIdeaDTO) brainstormingFindingDTO.getBrainsheets().get(0).getBrainwaves().get(0).getIdeas().get(0);
         SketchIdeaDTO sketchIdeaDTO = (SketchIdeaDTO) brainstormingFindingDTO.getBrainsheets().get(0).getBrainwaves().get(0).getIdeas().get(1);

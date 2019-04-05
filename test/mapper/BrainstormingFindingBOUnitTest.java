@@ -13,17 +13,18 @@ import java.util.ArrayList;
 import static org.junit.Assert.assertEquals;
 
 public class BrainstormingFindingBOUnitTest {
-    ModelsMapper modelMapper;
+
+    private ModelsMapper modelsMapper;
 
     @Before
     public void setUp() {
-        modelMapper = new ModelsMapper();
+        modelsMapper = new ModelsMapper();
     }
 
     @Test
     public void boToDtoTest(){
         BrainstormingFinding brainstormingFinding = createBrainstormingFinding();
-        BrainstormingFindingDTO brainstormingFindingDTO = modelMapper.toBrainstormingFindingDTO(brainstormingFinding);
+        BrainstormingFindingDTO brainstormingFindingDTO = modelsMapper.toBrainstormingFindingDTO(brainstormingFinding);
 
         NoteIdeaDTO noteIdeaDTO = (NoteIdeaDTO) brainstormingFindingDTO.getBrainsheets().get(0).getBrainwaves().get(0).getIdeas().get(0);
         SketchIdeaDTO sketchIdeaDTO = (SketchIdeaDTO) brainstormingFindingDTO.getBrainsheets().get(0).getBrainwaves().get(0).getIdeas().get(1);
@@ -57,7 +58,7 @@ public class BrainstormingFindingBOUnitTest {
     public void boToJsonTest(){
         BrainstormingFinding brainstormingFinding = createBrainstormingFinding();
 
-        BrainstormingFindingDTO brainstormingFindingDTO = modelMapper.toBrainstormingFindingDTO(brainstormingFinding);
+        BrainstormingFindingDTO brainstormingFindingDTO = modelsMapper.toBrainstormingFindingDTO(brainstormingFinding);
         JsonNode json = Json.toJson(brainstormingFindingDTO);
 
         NoteIdea noteIdea = (NoteIdea) brainstormingFinding.getBrainsheets().get(0).getBrainwaves().get(0).getIdeas().get(0);

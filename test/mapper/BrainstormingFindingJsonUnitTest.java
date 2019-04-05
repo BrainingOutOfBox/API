@@ -1,6 +1,5 @@
 package mapper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -16,18 +15,18 @@ import static org.junit.Assert.assertEquals;
 
 public class BrainstormingFindingJsonUnitTest {
 
-    private ModelsMapper modelMapper;
+    private ModelsMapper modelsMapper;
 
     @Before
     public void setUp() {
-        modelMapper = new ModelsMapper();
+        modelsMapper = new ModelsMapper();
     }
 
     @Test
     public void jsonToBoTest() {
         JsonNode json = createBrainstormingFindingJsonNode();
         BrainstormingFindingDTO brainstormingFindingDTO = Json.fromJson(json, BrainstormingFindingDTO.class);
-        BrainstormingFinding brainstormingFinding = modelMapper.toBrainstormingFinding(brainstormingFindingDTO);
+        BrainstormingFinding brainstormingFinding = modelsMapper.toBrainstormingFinding(brainstormingFindingDTO);
 
         NoteIdea noteIdea = (NoteIdea) brainstormingFinding.getBrainsheets().get(0).getBrainwaves().get(0).getIdeas().get(0);
         SketchIdea sketchIdea = (SketchIdea) brainstormingFinding.getBrainsheets().get(0).getBrainwaves().get(0).getIdeas().get(1);
