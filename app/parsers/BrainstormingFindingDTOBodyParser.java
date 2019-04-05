@@ -57,6 +57,10 @@ public class BrainstormingFindingDTOBodyParser implements BodyParser<Brainstormi
             return F.Either.Left(Results.badRequest(play.libs.Json.toJson(new ErrorMessage("Error","No problemDescription present"))));
         }
 
+        if (brainstormingFindingDTO.getType() == null){
+            return F.Either.Left(Results.badRequest(play.libs.Json.toJson(new ErrorMessage("Error","No type present"))));
+        }
+
         if (brainstormingFindingDTO.getNrOfIdeas() == 0){
             return F.Either.Left(Results.badRequest(play.libs.Json.toJson(new ErrorMessage("Error","No nrOfIdeas present"))));
         }

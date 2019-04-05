@@ -14,6 +14,7 @@ public class BrainstormingFindingDTO {
     private int baseRoundTime;
     private int currentRound;
     private String currentRoundEndTime;
+    private String type;
     private ArrayList<BrainsheetDTO> brainsheets;
     private int deliveredBrainsheetsInCurrentRound;
     private String brainstormingTeam;
@@ -23,7 +24,7 @@ public class BrainstormingFindingDTO {
         this.brainsheets = new ArrayList<>();
     }
 
-    public BrainstormingFindingDTO(String name, String problemDescription, int nrOfIdeas, int baseRoundTime, int currentRound, String currentRoundEndTime, ArrayList<BrainsheetDTO> brainsheetsDTO, int deliveredBrainsheetsInCurrentRound, String brainstormingTeam) {
+    public BrainstormingFindingDTO(String name, String problemDescription, int nrOfIdeas, int baseRoundTime, int currentRound, String currentRoundEndTime, String type, ArrayList<BrainsheetDTO> brainsheetsDTO, int deliveredBrainsheetsInCurrentRound, String brainstormingTeam) {
         this.identifier = UUID.randomUUID().toString();
         this.name = name;
         this.problemDescription = problemDescription;
@@ -31,6 +32,7 @@ public class BrainstormingFindingDTO {
         this.baseRoundTime = baseRoundTime;
         this.currentRound = currentRound;
         this.currentRoundEndTime = currentRoundEndTime;
+        this.type = type;
         this.brainsheets = brainsheetsDTO;
         this.deliveredBrainsheetsInCurrentRound = deliveredBrainsheetsInCurrentRound;
         this.brainstormingTeam = brainstormingTeam;
@@ -98,6 +100,14 @@ public class BrainstormingFindingDTO {
 
     public void setCurrentRoundEndTime(String currentRoundEndTime) {
         this.currentRoundEndTime = currentRoundEndTime;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public ArrayList<BrainsheetDTO> getBrainsheets() {
