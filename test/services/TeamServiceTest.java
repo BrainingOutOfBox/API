@@ -9,10 +9,10 @@ import services.mocks.MockDBTeamService;
 
 import java.util.ArrayList;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class TeamServiceTest {
@@ -81,15 +81,54 @@ public class TeamServiceTest {
     }
 
     @Test
-    public void leaveTeamTest(){
-        boolean result = service.leaveTeam(insertTeam, moderator);
+    public void joinTeamTest(){
+        boolean result = service.joinTeam(insertTeam, participant);
         assertTrue(result);
     }
 
     @Test
-    public void joinTeamTest(){
+    public void joinTwiceTeamTest(){
         boolean result = service.joinTeam(insertTeam, participant);
+        boolean result2 = service.joinTeam(insertTeam, participant);
         assertTrue(result);
+        assertFalse(result2);
+    }
+
+    @Test
+    public void joinMoreThanAllowedTeamTest(){
+        Participant participant2 = new Participant("TestParticipant2", "MirEgal", "Max", "Mustermann");
+        Participant participant3 = new Participant("TestParticipant3", "MirEgal", "Max", "Mustermann");
+        Participant participant4 = new Participant("TestParticipant4", "MirEgal", "Max", "Mustermann");
+        Participant participant5 = new Participant("TestParticipant5", "MirEgal", "Max", "Mustermann");
+
+
+        boolean result1 = service.joinTeam(insertTeam, participant);
+        boolean result2 = service.joinTeam(insertTeam, participant2);
+        boolean result3 = service.joinTeam(insertTeam, participant3);
+        boolean result4 = service.joinTeam(insertTeam, participant4);
+        boolean result5 = service.joinTeam(insertTeam, participant5);
+
+
+        assertTrue(result1);
+        assertTrue(result2);
+        assertTrue(result3);
+        assertFalse(result4);
+        assertFalse(result5);
+    }
+
+    @Test
+    public void leaveTeamTest(){
+        boolean result = service.leaveTeam(insertTeam, moderator);
+        assertTrue(result);
+
+    }
+
+    @Test
+    public void leaveTwiceTeamTest(){
+        boolean result = service.leaveTeam(insertTeam, moderator);
+        boolean result2 = service.leaveTeam(insertTeam, moderator);
+        assertTrue(result);
+        assertFalse(result2);
     }
 
 
