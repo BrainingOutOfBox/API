@@ -87,4 +87,12 @@ public class ModelsMapper {
         return modelMapper.map(brainsheetDTO, Brainsheet.class);
     }
 
+    public BrainwaveDTO toBrainwaveDTO(Brainwave brainwave){
+        return modelMapper.map(brainwave, BrainwaveDTO.class);
+    }
+
+    public Brainwave toBrainwave(BrainwaveDTO brainwaveDTO){
+        return modelMapper.map(brainwaveDTO, Brainwave.class);
+    }
+
 }
