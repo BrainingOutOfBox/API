@@ -61,7 +61,7 @@ public class TeamServiceTest {
         try {
 
             Queue<BrainstormingTeam> result = service.getAllTeamsOfParticipant(moderator).get();
-            assertEquals(membersList.size(), result.size());
+            assertEquals(1, result.size());
 
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();

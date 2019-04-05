@@ -19,9 +19,13 @@ public class MockDBTeamService implements DBTeamInterface {
     public CompletableFuture<BrainstormingTeam> getTeam(String id) {
         CompletableFuture<BrainstormingTeam> future = new CompletableFuture<>();
 
-        membersList.add(moderator);
-        team.setIdentifier("1111");
-        future.complete(team);
+        if (id.equals("1111")) {
+            membersList.add(moderator);
+            team.setIdentifier("1111");
+            future.complete(team);
+        } else {
+            future.complete(null);
+        }
 
         return future;
     }
