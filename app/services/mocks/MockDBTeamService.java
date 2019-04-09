@@ -45,8 +45,6 @@ public class MockDBTeamService implements DBTeamInterface {
 
     @Override
     public void changeTeamMembers(BrainstormingTeam team, Number number) {
-        int i = team.getCurrentNrOfParticipants() + number.intValue();
-        team.setCurrentNrOfParticipants(i);
 
     }
 

@@ -35,21 +35,10 @@ public class FindingServiceTest {
     }
 
     @Test
-    public void createFindingTest(){
+    public void insertFindingTest(){
         try {
             String result = service.insertFinding(findingDTO, "1111");
             assertNotEquals("", result);
-
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    public void createInvalidFindingTest(){
-        try {
-            String result = service.insertFinding(findingDTO, "1112");
-            assertNull(result);
 
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
@@ -123,6 +112,17 @@ public class FindingServiceTest {
         try {
             long result = service.calculateRemainingTimeOfFinding(findingDTO.getIdentifier());
             assertEquals(0, result);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void insertInvalidFindingTest(){
+        try {
+            String result = service.insertFinding(findingDTO, "1112");
+            assertNull(result);
+
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }

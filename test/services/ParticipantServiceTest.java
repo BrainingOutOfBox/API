@@ -9,7 +9,6 @@ import services.mocks.MockDBParticipantService;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class ParticipantServiceTest {
@@ -31,18 +30,6 @@ public class ParticipantServiceTest {
 
             boolean result = service.insertParticipant(insertParticipant);
             assertTrue(result);
-
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    public void createInvalidParticipantTest(){
-        try {
-
-            boolean result = service.insertParticipant(testParticipant);
-            assertFalse(result);
 
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
