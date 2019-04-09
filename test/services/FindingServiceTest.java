@@ -72,6 +72,17 @@ public class FindingServiceTest {
     }
 
     @Test
+    public void getInvalidFindingTest(){
+        try {
+            BrainstormingFinding result = service.getFinding("3333").get();
+            assertNull(result);
+
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
     public void getAllFindingsOfTeamTest(){
         Participant moderator = new Participant("TestModerator", "MirEgal", "Max", "Mustermann");
         ArrayList membersList = new ArrayList<>();
@@ -90,7 +101,7 @@ public class FindingServiceTest {
     }
 
     @Test
-    public void exchangeBrainsheet(){
+    public void exchangeBrainsheetTest(){
         ArrayList<Brainwave> brainwaves = new ArrayList<>();
         ArrayList<Idea> ideas = new ArrayList<>();
 
@@ -108,10 +119,57 @@ public class FindingServiceTest {
     }
 
     @Test
+    public void exchangeInvalidBrainsheetTest(){
+        ArrayList<Brainwave> brainwaves = new ArrayList<>();
+        ArrayList<Idea> ideas = new ArrayList<>();
+
+        ideas.add(new NoteIdea("Inserted"));
+        brainwaves.add(new Brainwave(0, ideas));
+        Brainsheet newBrainsheet = new Brainsheet(0, brainwaves);
+
+        try {
+            boolean result = service.exchangeBrainsheet("3333", newBrainsheet);
+            assertFalse(result);
+
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void exchangeWrongBrainsheetNumberTest(){
+        ArrayList<Brainwave> brainwaves = new ArrayList<>();
+        ArrayList<Idea> ideas = new ArrayList<>();
+
+        ideas.add(new NoteIdea("Inserted"));
+        brainwaves.add(new Brainwave(0, ideas));
+        Brainsheet newBrainsheet = new Brainsheet(1, brainwaves);
+
+        try {
+            boolean result = service.exchangeBrainsheet(findingDTO.getIdentifier(), newBrainsheet);
+            assertFalse(result);
+
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
     public void startBrainstormingTest(){
         try {
             boolean result = service.startBrainstorming(findingDTO.getIdentifier());
             assertTrue(result);
+
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void startInvalidBrainstormingTest(){
+        try {
+            boolean result = service.startBrainstorming("3333");
+            assertFalse(result);
 
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
