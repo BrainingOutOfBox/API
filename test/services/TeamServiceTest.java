@@ -19,7 +19,6 @@ public class TeamServiceTest {
 
     private TeamService service;
     private BrainstormingTeam insertTeam;
-    private ArrayList<Participant> membersList;
     private Participant moderator;
     private Participant participant;
 
@@ -30,9 +29,7 @@ public class TeamServiceTest {
 
 
         this.moderator = new Participant("TestModerator", "MirEgal", "Max", "Mustermann");
-        this.membersList = new ArrayList<>();
-        this.membersList.add(moderator);
-        this.insertTeam = new BrainstormingTeam("NotInDBTeam", "Test", 4, 1, membersList, moderator);
+        this.insertTeam = new BrainstormingTeam("NotInDBTeam", "Test", 4, 0, new ArrayList<>(), moderator);
         this.insertTeam.setIdentifier("1111");
     }
 
@@ -112,21 +109,32 @@ public class TeamServiceTest {
         assertTrue(result1);
         assertTrue(result2);
         assertTrue(result3);
-        assertFalse(result4);
+        assertTrue(result4);
         assertFalse(result5);
     }
 
     @Test
     public void leaveTeamTest(){
-        boolean result = service.leaveTeam(insertTeam, moderator);
+        ArrayList<Participant> list = new ArrayList<>();
+        list.add(moderator);
+
+        BrainstormingTeam team = new BrainstormingTeam("NotInDBTeam", "Test", 4, 1, list, moderator);
+
+        boolean result = service.leaveTeam(team, moderator);
         assertTrue(result);
 
     }
 
     @Test
     public void leaveTwiceTeamTest(){
-        boolean result = service.leaveTeam(insertTeam, moderator);
-        boolean result2 = service.leaveTeam(insertTeam, moderator);
+        ArrayList<Participant> list = new ArrayList<>();
+        list.add(moderator);
+
+        BrainstormingTeam team = new BrainstormingTeam("NotInDBTeam", "Test", 4, 1, list, moderator);
+
+
+        boolean result = service.leaveTeam(team, moderator);
+        boolean result2 = service.leaveTeam(team, moderator);
         assertTrue(result);
         assertFalse(result2);
     }

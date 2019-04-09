@@ -38,9 +38,6 @@ public class TeamJsonUnitTest {
         assertEquals(team.getModerator().getFirstname(), json.findPath("firstname").asText());
         assertEquals(team.getModerator().getLastname(), json.findPath("lastname").asText());
 
-        assertEquals(team.getParticipants().get(0).getUsername(), json.findPath("username").asText());
-
-
     }
 
     private JsonNode createTeamJsonNode() {
