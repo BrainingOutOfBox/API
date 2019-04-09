@@ -20,7 +20,7 @@ public class BrainsheetDTOBodyParser implements BodyParser<BrainsheetDTO> {
     private Executor executor;
 
     @Inject
-    public BrainsheetDTOBodyParser(Json jsonParser, Executor executor) {
+    public BrainsheetDTOBodyParser(BodyParser.Json jsonParser, Executor executor) {
         this.jsonParser = jsonParser;
         this.executor = executor;
     }
