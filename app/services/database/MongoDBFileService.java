@@ -1,6 +1,5 @@
 package services.database;
 
-import com.mongodb.async.SingleResultCallback;
 import com.mongodb.async.client.gridfs.GridFSBucket;
 import com.mongodb.async.client.gridfs.GridFSBuckets;
 import com.mongodb.async.client.gridfs.GridFSDownloadStream;
@@ -21,7 +20,7 @@ public class MongoDBFileService implements DBFileInterface {
     @Inject
     public MongoDBFileService(MongoDBEngineProvider mongoDBEngineProvider) {
         this.mongoDBProvider = mongoDBEngineProvider;
-        this.gridFSBucket = GridFSBuckets.create(mongoDBEngineProvider.getDatabase());
+        this.gridFSBucket = GridFSBuckets.create(mongoDBProvider.getDatabase());
     }
 
     @Override
