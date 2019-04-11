@@ -17,7 +17,14 @@ public class TeamService {
         this.service = service;
     }
 
-    public void insertTeam(BrainstormingTeam team){ service.insertTeam(team); }
+    public void insertTeam(BrainstormingTeam team){
+        Participant participant = new Participant(team.getModerator().getUsername(), team.getModerator().getPassword(), team.getModerator().getFirstname(), team.getModerator().getLastname());
+
+        if (team.joinTeam(participant)) {
+            team.setCurrentNrOfParticipants(1);
+            service.insertTeam(team);
+        }
+    }
 
     public CompletableFuture<Long> deleteTeam(BrainstormingTeam team){
         return service.deleteTeam(team);

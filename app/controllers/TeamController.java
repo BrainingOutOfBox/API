@@ -41,10 +41,6 @@ public class TeamController extends Controller {
         BrainstormingTeamDTO brainstormingTeamDTO = request().body().as(BrainstormingTeamDTO.class);
         BrainstormingTeam brainstormingTeam = modelsMapper.toBrainstormingTeam(brainstormingTeamDTO);
 
-        Participant participant = new Participant(brainstormingTeamDTO.getModerator().getUsername(), brainstormingTeamDTO.getModerator().getPassword(), brainstormingTeamDTO.getModerator().getFirstname(), brainstormingTeamDTO.getModerator().getLastname());
-        brainstormingTeam.joinTeam(participant);
-        brainstormingTeam.setCurrentNrOfParticipants(1);
-
         service.insertTeam(brainstormingTeam);
         return ok(Json.toJson(new SuccessMessage("Success", brainstormingTeam.getIdentifier())));
     }
