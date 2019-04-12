@@ -49,12 +49,12 @@ public class BrainstormingFindingDTOBodyParser implements BodyParser<Brainstormi
 
     private F.Either<Result, BrainstormingFindingDTO> checkBrainstormingDTO(BrainstormingFindingDTO brainstormingFindingDTO){
 
-        if (brainstormingFindingDTO.getName() == null){
+        if (brainstormingFindingDTO.getName().equals("")){
             return F.Either.Left(Results.badRequest(play.libs.Json.toJson(new ErrorMessage("Error","No name present"))));
         }
 
-        if (brainstormingFindingDTO.getProblemDescription() == null){
-            return F.Either.Left(Results.badRequest(play.libs.Json.toJson(new ErrorMessage("Error","No problemDescription present"))));
+        if (brainstormingFindingDTO.getType().equals("")){
+            return F.Either.Left(Results.badRequest(play.libs.Json.toJson(new ErrorMessage("Error","No type present"))));
         }
 
         if (brainstormingFindingDTO.getNrOfIdeas() == 0){

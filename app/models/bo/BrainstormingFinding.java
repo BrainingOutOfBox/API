@@ -14,6 +14,7 @@ public class BrainstormingFinding {
     private int baseRoundTime;
     private int currentRound;
     private String currentRoundEndTime;
+    private String type;
     private ArrayList<Brainsheet> brainsheets;
     private int deliveredBrainsheetsInCurrentRound;
     private String brainstormingTeam;
@@ -22,7 +23,7 @@ public class BrainstormingFinding {
 
     }
 
-    public BrainstormingFinding(String name, String problemDescription, int nrOfIdeas, int baseRoundTime, int currentRound, String currentRoundEndTime, ArrayList<Brainsheet> brainsheets, int deliveredBrainsheetsInCurrentRound, String brainstormingTeam) {
+    public BrainstormingFinding(String name, String problemDescription, int nrOfIdeas, int baseRoundTime, int currentRound, String currentRoundEndTime, String type, ArrayList<Brainsheet> brainsheets, int deliveredBrainsheetsInCurrentRound, String brainstormingTeam) {
         this.identifier = UUID.randomUUID().toString();
         this.name = name;
         this.problemDescription = problemDescription;
@@ -30,6 +31,7 @@ public class BrainstormingFinding {
         this.baseRoundTime = baseRoundTime;
         this.currentRound = currentRound;
         this.currentRoundEndTime = currentRoundEndTime;
+        this.type = type;
         this.brainsheets = brainsheets;
         this.deliveredBrainsheetsInCurrentRound = deliveredBrainsheetsInCurrentRound;
         this.brainstormingTeam = brainstormingTeam;
@@ -97,6 +99,14 @@ public class BrainstormingFinding {
 
     public void setCurrentRoundEndTime(String currentRoundEndTime) {
         this.currentRoundEndTime = currentRoundEndTime;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public ArrayList<Brainsheet> getBrainsheets() {

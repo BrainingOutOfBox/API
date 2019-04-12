@@ -6,7 +6,6 @@ import models.*;
 import models.bo.*;
 import models.dto.BrainsheetDTO;
 import models.dto.BrainstormingFindingDTO;
-import org.joda.time.DateTime;
 import parsers.BrainsheetDTOBodyParser;
 import parsers.BrainstormingFindingDTOBodyParser;
 import play.libs.Json;
@@ -43,6 +42,7 @@ public class FindingController extends Controller {
         BrainstormingFindingDTO brainstormingFindingDTO = request().body().as(BrainstormingFindingDTO.class);
 
         try {
+
             String identifier = service.insertFinding(brainstormingFindingDTO, teamIdentifier);
 
             if (identifier != null) {
@@ -182,66 +182,4 @@ public class FindingController extends Controller {
             return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
     }
-
-    /*private void startWatcherForBrainstormingFinding(String findingIdentifier){
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    BrainstormingFinding finding = getBrainstormingFinding(findingIdentifier);
-                    DateTime endDateTime = DateTime.parse(finding.getCurrentRoundEndTime());
-
-                    *//*
-                    System.out.println("Task started for " + finding.getIdentifier());
-                    System.out.println(finding.getIdentifier() + "_Delivered Sheets: " + finding.getDeliveredBrainsheetsInCurrentRound());
-                    System.out.println(finding.getIdentifier() + "_End Time " + finding.getCurrentRoundEndTime());
-                    System.out.println(finding.getIdentifier() + "_Currend Round: " + finding.getCurrentRound());
-                    *//*
-
-
-                    if (endDateTime.plusSeconds(30).isBeforeNow() ||
-                        finding.getDeliveredBrainsheetsInCurrentRound() >= finding.getBrainsheets().size()){
-
-                        if (finding.getCurrentRound() == finding.getBrainsheets().size()){
-                            //System.out.println("shutdown");
-                            lastRound(finding);
-                            executor.shutdown();
-                        } else {
-                            //System.out.println("next Round");
-                            nextRound(finding);
-                        }
-                    }
-
-                    //System.out.println("cancel");
-                    cancel();
-
-                } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-
-        executor.scheduleAtFixedRate(task, 1000L, 5000L, TimeUnit.MILLISECONDS);
-    }*/
-/*
-    private Result nextRound(BrainstormingFinding finding){
-        if (finding != null) {
-            service.nextRound(finding);
-            return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingFinding successfully updated")));
-        }
-
-        return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found")));
-    }
-
-    private Result lastRound(BrainstormingFinding finding){
-        if (finding != null) {
-            service.lastRound(finding);
-            return ok(Json.toJson(new SuccessMessage("Success", "BrainstormingFinding successfully updated")));
-        }
-
-        return internalServerError(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found")));
-    }
-*/
-
 }

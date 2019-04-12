@@ -6,14 +6,27 @@ import services.database.DBTeamInterface;
 
 import javax.inject.Inject;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class TeamService {
 
-    @Inject
     private DBTeamInterface service;
 
-    public void insertTeam(BrainstormingTeam team){ service.insertTeam(team); }
+    @Inject
+    public TeamService(DBTeamInterface service) {
+        this.service = service;
+    }
+
+    public void insertTeam(BrainstormingTeam team){
+        Participant participant = new Participant(team.getModerator().getUsername(), team.getModerator().getPassword(), team.getModerator().getFirstname(), team.getModerator().getLastname());
+
+        if (team.joinTeam(participant)) {
+            team.setCurrentNrOfParticipants(1);
+            team.setIdentifier(UUID.randomUUID().toString());
+            service.insertTeam(team);
+        }
+    }
 
     public CompletableFuture<Long> deleteTeam(BrainstormingTeam team){
         return service.deleteTeam(team);

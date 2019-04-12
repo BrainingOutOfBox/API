@@ -41,6 +41,10 @@ GET     /Finding/:findingIdentifier/startBrainstorming              controllers.
 + noJwtFilter
 GET     /Finding/:findingIdentifier/getRemainingTime                controllers.FindingController.calculateRemainingTimeOfFinding(findingIdentifier)
 
++ noJwtFilter
+POST    /Files/upload                                               controllers.FileController.uploadFile()
++ noJwtFilter
+GET     /Files/download/:fileIdentifier                             controllers.FileController.downloadFile(fileIdentifier)
 
 
 # swagger routes

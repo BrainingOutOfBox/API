@@ -11,16 +11,21 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.TimerTask;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 public class FindingService {
-    @Inject
+
     private DBFindingInterface service;
-    @Inject
     private DBTeamInterface teamService;
-    @Inject
     private ModelsMapper modelsMapper;
 
+    @Inject
+    public FindingService(DBFindingInterface service, DBTeamInterface teamService, ModelsMapper modelsMapper) {
+        this.service = service;
+        this.teamService = teamService;
+        this.modelsMapper = modelsMapper;
+    }
 
     public String insertFinding(BrainstormingFindingDTO brainstormingFindingDTO, String teamIdentifier) throws ExecutionException, InterruptedException {
         BrainstormingTeam team = teamService.getTeam(teamIdentifier).get();
@@ -150,7 +155,7 @@ public class FindingService {
 
         //creating ideas
         for (int k = 0; k < brainstormingFindingDTO.getNrOfIdeas(); k++){
-            ideas.add(new Idea(""));
+            ideas.add(new NoteIdea(""));
         }
         //creating brainwaves
         for (int j = 0; j < team.getNrOfParticipants(); j++){
@@ -164,6 +169,7 @@ public class FindingService {
         }
 
         BrainstormingFinding brainstormingFinding = modelsMapper.toBrainstormingFinding(brainstormingFindingDTO);
+        brainstormingFinding.setIdentifier(UUID.randomUUID().toString());
         brainstormingFinding.setCurrentRound(0);
         brainstormingFinding.setCurrentRoundEndTime("");
         brainstormingFinding.setBrainsheets(brainsheets);
