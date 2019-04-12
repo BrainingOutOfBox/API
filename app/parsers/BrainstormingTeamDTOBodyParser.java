@@ -62,10 +62,6 @@ public class BrainstormingTeamDTOBodyParser implements BodyParser<BrainstormingT
             return F.Either.Left(Results.badRequest(play.libs.Json.toJson(new ErrorMessage("Error","No name present"))));
         }
 
-        if (brainstormingTeamDTO.getPurpose() == null || brainstormingTeamDTO.getPurpose().length() == 0){
-            return F.Either.Left(Results.badRequest(play.libs.Json.toJson(new ErrorMessage("Error","No purpose present"))));
-        }
-
         if (brainstormingTeamDTO.getNrOfParticipants() == 0){
             return F.Either.Left(Results.badRequest(play.libs.Json.toJson(new ErrorMessage("Error","No nrOfParticipants present"))));
         }

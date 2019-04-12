@@ -33,7 +33,7 @@ public class Filters extends DefaultHttpFilters {
     public List<EssentialFilter> getFilters() {
         List<EssentialFilter> zeFilters = enabledFilters.asJava().getFilters();
         zeFilters.add(corsFilter.asJava());
-        zeFilters.add(jwtFilter);
+        //zeFilters.add(jwtFilter);
         return zeFilters;
     }
 }

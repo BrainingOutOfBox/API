@@ -42,6 +42,7 @@ public class FindingController extends Controller {
         BrainstormingFindingDTO brainstormingFindingDTO = request().body().as(BrainstormingFindingDTO.class);
 
         try {
+
             String identifier = service.insertFinding(brainstormingFindingDTO, teamIdentifier);
 
             if (identifier != null) {

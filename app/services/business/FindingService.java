@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.TimerTask;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 public class FindingService {
@@ -168,6 +169,7 @@ public class FindingService {
         }
 
         BrainstormingFinding brainstormingFinding = modelsMapper.toBrainstormingFinding(brainstormingFindingDTO);
+        brainstormingFinding.setIdentifier(UUID.randomUUID().toString());
         brainstormingFinding.setCurrentRound(0);
         brainstormingFinding.setCurrentRoundEndTime("");
         brainstormingFinding.setBrainsheets(brainsheets);

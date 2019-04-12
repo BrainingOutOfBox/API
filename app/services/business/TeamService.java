@@ -6,6 +6,7 @@ import services.database.DBTeamInterface;
 
 import javax.inject.Inject;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class TeamService {
@@ -22,6 +23,7 @@ public class TeamService {
 
         if (team.joinTeam(participant)) {
             team.setCurrentNrOfParticipants(1);
+            team.setIdentifier(UUID.randomUUID().toString());
             service.insertTeam(team);
         }
     }
