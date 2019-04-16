@@ -1,6 +1,9 @@
 package controllers;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import mappers.ModelsMapper;
 import models.ErrorMessage;
 import models.bo.PatternIdea;
@@ -24,16 +27,23 @@ public class PatternController extends Controller {
     @Inject
     private ModelsMapper modelsMapper;
 
+    @ApiOperation(
+            nickname = "getPatternIdeas",
+            value = "Get all patternIdeas",
+            notes = "With this method you can get all patternIdeas",
+            httpMethod = "GET",
+            response = PatternIdea.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = PatternIdea.class),
+            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     public Result getAllPatternIdeas(){
-
         CompletableFuture<Queue<PatternIdea>> future = service.getAllPatternIdeas();
         Queue<PatternIdeaDTO> list = new LinkedList<>();
 
         try {
 
             for (PatternIdea patternIdea : future.get()) {
-                PatternIdeaDTO patternIdeaDTO = new PatternIdeaDTO(patternIdea.getDescription(), patternIdea.getProblem(), patternIdea.getSolution(), patternIdea.getUrl(), patternIdea.getCategory(), patternIdea.getPictureId());
-                //PatternIdeaDTO patternIdeaDTO = modelsMapper.toPatternIdeaDTO(patternIdea);
+                PatternIdeaDTO patternIdeaDTO = modelsMapper.toPatternIdeaDTO(patternIdea);
                 list.add(patternIdeaDTO);
             }
 

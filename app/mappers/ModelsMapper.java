@@ -95,4 +95,16 @@ public class ModelsMapper {
         return modelMapper.map(brainwaveDTO, Brainwave.class);
     }
 
+    public PatternIdeaDTO toPatternIdeaDTO(PatternIdea patternIdea){
+        //need second modelmapper to overwrite the above settings
+        ModelMapper newModelMapper = new ModelMapper();
+        return newModelMapper.map(patternIdea, PatternIdeaDTO.class);
+    }
+
+    public PatternIdea toPatternIdea(PatternIdeaDTO patternIdeaDTO){
+        //need second modelmapper to overwrite the above settings
+        ModelMapper newModelMapper = new ModelMapper();
+        return newModelMapper.map(patternIdeaDTO, PatternIdea.class);
+    }
+
 }
