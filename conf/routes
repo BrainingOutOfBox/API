@@ -46,6 +46,8 @@ POST    /Files/upload                                               controllers.
 + noJwtFilter
 GET     /Files/download/:fileIdentifier                             controllers.FileController.downloadFile(fileIdentifier)
 
++ noJwtFilter
+GET     /Patterns/getPatternIdeas                                   controllers.PatternController.getAllPatternIdeas()
 
 # swagger routes
 + noJwtFilter
