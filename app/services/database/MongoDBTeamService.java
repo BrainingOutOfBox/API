@@ -21,13 +21,11 @@ import static com.mongodb.client.model.Updates.set;
 
 public class MongoDBTeamService implements DBTeamInterface {
 
-    private MongoDBEngineProvider mongoDBProvider;
-    MongoCollection<BrainstormingTeam> teamCollection;
+    private MongoCollection<BrainstormingTeam> teamCollection;
 
     @Inject
     public MongoDBTeamService(MongoDBEngineProvider mongoDBEngineProvider) {
-        this.mongoDBProvider = mongoDBEngineProvider;
-        this.teamCollection = mongoDBProvider.getDatabase().getCollection("BrainstormingTeam", BrainstormingTeam.class);
+        this.teamCollection = mongoDBEngineProvider.getDatabase().getCollection("BrainstormingTeam", BrainstormingTeam.class);
     }
 
     public void insertTeam(BrainstormingTeam team){

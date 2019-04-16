@@ -14,13 +14,11 @@ import java.util.concurrent.ExecutionException;
 
 public class MongoDBFileService implements DBFileInterface {
 
-    private MongoDBEngineProvider mongoDBProvider;
     private GridFSBucket gridFSBucket;
 
     @Inject
     public MongoDBFileService(MongoDBEngineProvider mongoDBEngineProvider) {
-        this.mongoDBProvider = mongoDBEngineProvider;
-        this.gridFSBucket = GridFSBuckets.create(mongoDBProvider.getDatabase());
+        this.gridFSBucket = GridFSBuckets.create(mongoDBEngineProvider.getDatabase());
     }
 
     @Override
