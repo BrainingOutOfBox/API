@@ -6,6 +6,7 @@ import com.mongodb.async.client.gridfs.GridFSDownloadStream;
 import com.mongodb.async.client.gridfs.GridFSUploadStream;
 import config.MongoDBEngineProvider;
 import org.bson.types.ObjectId;
+import play.Logger;
 
 import javax.inject.Inject;
 import java.nio.ByteBuffer;
@@ -28,7 +29,7 @@ public class MongoDBFileService implements DBFileInterface {
 
         final GridFSUploadStream uploadStream = gridFSBucket.openUploadStream(fileName);
         uploadStream.write(data, (result, t) -> {
-            System.out.println("File successfully inserted; ID: " + uploadStream.getObjectId().toHexString());
+            Logger.info("File successfully inserted; ID: " + uploadStream.getObjectId().toHexString());
             future.complete(uploadStream.getObjectId().toHexString());
 
             uploadStream.close((result1, t1) -> {
@@ -50,7 +51,7 @@ public class MongoDBFileService implements DBFileInterface {
             dstByteBuffer.flip();
             byte[] bytes = new byte[result];
             dstByteBuffer.get(bytes);
-            System.out.println("Found file to download; Size: " + result);
+            Logger.info("Found file to download; Size: " + result);
             future.complete(bytes);
 
             downloadStream.close((result1, t1) -> {
