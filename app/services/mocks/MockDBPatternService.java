@@ -20,4 +20,19 @@ public class MockDBPatternService implements DBPatternInterface {
 
         return future;
     }
+
+    @Override
+    public CompletableFuture<PatternIdea> getPatternIdea(String description) {
+        return null;
+    }
+
+    @Override
+    public void insertPattern(PatternIdea patternIdea) {
+
+    }
+
+    @Override
+    public CompletableFuture<Long> deletePattern(PatternIdea patternIdea) {
+        return null;
+    }
 }

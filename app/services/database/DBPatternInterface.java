@@ -11,4 +11,10 @@ public interface DBPatternInterface {
 
     CompletableFuture<Queue<PatternIdea>> getAllPatternIdeas();
 
+    CompletableFuture<PatternIdea> getPatternIdea(String description);
+
+    void insertPattern(PatternIdea patternIdea);
+
+    CompletableFuture<Long> deletePattern(PatternIdea patternIdea);
+
 }

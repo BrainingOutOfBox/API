@@ -48,6 +48,11 @@ GET     /Files/download/:fileIdentifier                             controllers.
 
 + noJwtFilter
 GET     /Patterns/getPatternIdeas                                   controllers.PatternController.getAllPatternIdeas()
++ noJwtFilter
+POST    /Patterns/createPattern                                     controllers.PatternController.createPattern()
++ noJwtFilter
+DELETE  /Patterns/deletePattern                                     controllers.PatternController.deletePattern()
+
 
 # swagger routes
 + noJwtFilter

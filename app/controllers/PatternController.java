@@ -6,9 +6,13 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import mappers.ModelsMapper;
 import models.ErrorMessage;
+import models.SuccessMessage;
 import models.bo.PatternIdea;
 import models.dto.PatternIdeaDTO;
+import parsers.PatternIdeaDTOBodyParser;
+import play.Logger;
 import play.libs.Json;
+import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import services.business.PatternService;
@@ -49,6 +53,59 @@ public class PatternController extends Controller {
 
             return ok(Json.toJson(list));
 
+        } catch (InterruptedException | ExecutionException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
+        }
+    }
+
+    @ApiOperation(
+            nickname = "createPattern",
+            value = "Create a pattern",
+            notes = "With this method you can create a pattern",
+            httpMethod = "POST",
+            response = SuccessMessage.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
+            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    @BodyParser.Of(PatternIdeaDTOBodyParser.class)
+    public Result createPattern() {
+        PatternIdeaDTO patternIdeaDTO = request().body().as(PatternIdeaDTO.class);
+        PatternIdea patternIdea = modelsMapper.toPatternIdea(patternIdeaDTO);
+
+        try {
+            if (service.insertPattern(patternIdea)){
+                return ok(Json.toJson(new SuccessMessage("Success", "Pattern successfully inserted")));
+            } else {
+                Logger.info("Pattern already exists");
+                return badRequest(Json.toJson(new ErrorMessage("Error", "Pattern with this description already exists")));
+            }
+        } catch (ExecutionException | InterruptedException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
+        }
+    }
+
+    @ApiOperation(
+            nickname = "deletePattern",
+            value = "Delete a pattern",
+            notes = "With this method you can delete a pattern",
+            httpMethod = "DELETE",
+            response = SuccessMessage.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = SuccessMessage.class),
+            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    @BodyParser.Of(PatternIdeaDTOBodyParser.class)
+    public Result deletePattern() {
+        PatternIdeaDTO patternIdeaDTO = request().body().as(PatternIdeaDTO.class);
+        PatternIdea patternIdea = modelsMapper.toPatternIdea(patternIdeaDTO);
+
+        CompletableFuture<Long> future = service.deletePattern(patternIdea);
+
+        try {
+            if (future.get() > 0){
+                return ok(Json.toJson(new SuccessMessage("Success", "Pattern successfully deleted")));
+            } else {
+                return badRequest(Json.toJson(new ErrorMessage("Error", "No Pattern deleted!")));
+            }
         } catch (InterruptedException | ExecutionException e) {
             return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
