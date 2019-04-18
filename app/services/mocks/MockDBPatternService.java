@@ -9,11 +9,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MockDBPatternService implements DBPatternInterface {
 
+    private PatternIdea patternIdea = new PatternIdea("Test Pattern Idea", "Test", "Test", "www.Test.ch", "Test", "1234");
+
     @Override
     public CompletableFuture<Queue<PatternIdea>> getAllPatternIdeas() {
         CompletableFuture<Queue<PatternIdea>> future = new CompletableFuture<>();
         Queue<PatternIdea> queue = new ConcurrentLinkedQueue<>();
-        PatternIdea patternIdea = new PatternIdea("Test Pattern Idea", "Test", "Test", "www.Test.ch", "Test", "1234");
 
         queue.add(patternIdea);
         future.complete(queue);
@@ -23,7 +24,15 @@ public class MockDBPatternService implements DBPatternInterface {
 
     @Override
     public CompletableFuture<PatternIdea> getPatternIdea(String description) {
-        return null;
+        CompletableFuture<PatternIdea> future = new CompletableFuture<>();
+
+        if (description.equals("NotInDBPattern")){
+            future.complete(null);
+        } else {
+            future.complete(patternIdea);
+        }
+
+        return future;
     }
 
     @Override
@@ -33,6 +42,8 @@ public class MockDBPatternService implements DBPatternInterface {
 
     @Override
     public CompletableFuture<Long> deletePattern(PatternIdea patternIdea) {
-        return null;
+        CompletableFuture<Long> future = new CompletableFuture<>();
+        future.complete(1L);
+        return future;
     }
 }
