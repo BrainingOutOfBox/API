@@ -53,7 +53,6 @@ POST    /Patterns/createPattern                                     controllers.
 + noJwtFilter
 DELETE  /Patterns/deletePattern                                     controllers.PatternController.deletePattern()
 
-
 # swagger routes
 + noJwtFilter
 GET     /swagger.json                                               controllers.ApiHelpController.getResources
