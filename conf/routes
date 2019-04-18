@@ -44,7 +44,7 @@ GET     /Finding/:findingIdentifier/getRemainingTime                controllers.
 + noJwtFilter
 POST    /Files/upload                                               controllers.FileController.uploadFile()
 + noJwtFilter
-GET     /Files/download/:fileIdentifier                             controllers.FileController.downloadFile(fileIdentifier)
+GET     /Files/:fileIdentifier/download                             controllers.FileController.downloadFile(fileIdentifier)
 
 + noJwtFilter
 GET     /Patterns/getPatternIdeas                                   controllers.PatternController.getAllPatternIdeas()
