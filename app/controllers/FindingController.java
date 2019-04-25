@@ -16,6 +16,7 @@ import play.mvc.Result;
 import services.business.FindingService;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -179,6 +180,34 @@ public class FindingController extends Controller {
                 return badRequest(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found or brainstormingFinding has already started or ended")));
             }
         } catch (ExecutionException | InterruptedException e) {
+            return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
+        }
+    }
+
+    @ApiOperation(
+            nickname = "exportBrainstormingFinding",
+            value = "export a brainstormingFinding",
+            notes = "With this method you can export the brainstormingFinding",
+            httpMethod = "GET",
+            response = SuccessMessage.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = BrainstormingFinding.class),
+            @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
+    public Result exportBrainstorming(String findingIdentifier){
+        try {
+
+            BrainstormingFinding finding = service.getFinding(findingIdentifier).get();
+
+            if (finding != null) {
+                StringBuilder sb = new StringBuilder().append(finding);
+                System.out.println(sb);
+
+                return ok(sb.toString());
+            } else {
+                return badRequest(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found")));
+            }
+
+        } catch (InterruptedException | ExecutionException e) {
             return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
     }

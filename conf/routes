@@ -40,6 +40,9 @@ PUT     /Finding/:findingIdentifier/putBrainsheet                   controllers.
 GET     /Finding/:findingIdentifier/startBrainstorming              controllers.FindingController.startBrainstorming(findingIdentifier)
 + noJwtFilter
 GET     /Finding/:findingIdentifier/getRemainingTime                controllers.FindingController.calculateRemainingTimeOfFinding(findingIdentifier)
++ noJwtFilter
+GET     /Finding/:findingIdentifier/export                          controllers.FindingController.exportBrainstorming(findingIdentifier)
+
 
 + noJwtFilter
 POST    /Files/upload                                               controllers.FileController.uploadFile()
