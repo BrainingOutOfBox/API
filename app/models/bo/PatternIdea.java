@@ -1,5 +1,7 @@
 package models.bo;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import net.steppschuh.markdowngenerator.MarkdownSerializationException;
 import net.steppschuh.markdowngenerator.image.Image;
 import net.steppschuh.markdowngenerator.text.emphasis.BoldText;
@@ -17,7 +19,6 @@ public class PatternIdea extends Idea{
     public PatternIdea() {
         super();
     }
-
 
     public PatternIdea(String description, String problem, String solution, String url, String category, String pictureId) {
         super(description);
@@ -71,9 +72,10 @@ public class PatternIdea extends Idea{
     @BsonIgnore
     @Override
     public String getPredecessor() {
+        Config config = ConfigFactory.load();
         StringBuilder patternIdea = new StringBuilder();
         String text = getDescription();
-        String url = "http://localhost:40000/Files/" + getPictureId() + "/download";
+        String url = config.getString("play.https.prodProtocol") + "://" + config.getString("play.https.prodAddress") + ":" + config.getString("play.https.prodPort") + "/Files/" + getPictureId() + "/download";
 
         patternIdea.append(new Image(text, url).toString()).append("\n")
                 .append(new BoldText("Pattern:")).append(" ").append(new ItalicText(text).toString()).append("\n")

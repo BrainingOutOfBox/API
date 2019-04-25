@@ -1,5 +1,7 @@
 package models.bo;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import net.steppschuh.markdowngenerator.MarkdownSerializationException;
 import net.steppschuh.markdowngenerator.image.Image;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
@@ -29,9 +31,10 @@ public class SketchIdea extends Idea {
     @BsonIgnore
     @Override
     public String getPredecessor() {
+        Config config =  ConfigFactory.load();
         StringBuilder sketchIdea = new StringBuilder();
         String text = getDescription();
-        String url = "http://localhost:40000/Files/" + getPictureId() + "/download";
+        String url = config.getString("play.https.prodProtocol") + "://" + config.getString("play.https.prodAddress") + ":" + config.getString("play.https.prodPort") + "/Files/" + getPictureId() + "/download";
         sketchIdea.append(new Image(text, url).toString());
 
         return sketchIdea.toString();
