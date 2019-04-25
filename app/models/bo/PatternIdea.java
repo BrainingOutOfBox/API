@@ -80,7 +80,7 @@ public class PatternIdea extends Idea{
         patternIdea.append(new Image(text, url).toString()).append("\n")
                 .append(new BoldText("Pattern:")).append(" ").append(new ItalicText(text).toString()).append("\n")
                 .append(new BoldText("Problem:")).append(" ").append(new ItalicText(getProblem()).toString()).append("\n")
-                .append(new BoldText("Solution:")).append(" ").append(new ItalicText(getSolution()).toString()).append("\n");
+                .append(new BoldText("Solution:")).append(" ").append(new ItalicText(getSolution()).toString());
 
         return patternIdea.toString();
     }
