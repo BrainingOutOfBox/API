@@ -18,7 +18,7 @@ public class FileService {
         return service.uploadFileAsStream(stream,fileName);
     }
 
-    public byte[] downloadFileAsStream(String id) throws ExecutionException, InterruptedException {
+    public byte[] downloadFileAsStream(String id) throws ExecutionException, InterruptedException, IllegalArgumentException {
         return service.downloadFileAsStream(id);
     }
 }

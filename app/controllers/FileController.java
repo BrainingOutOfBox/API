@@ -66,7 +66,7 @@ public class FileController extends Controller {
             byte[] result = service.downloadFileAsStream(fileIdentifier);
             return ok(result);
 
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | IllegalArgumentException e) {
             return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
     }
