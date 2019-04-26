@@ -6,6 +6,7 @@ import models.*;
 import models.bo.*;
 import models.dto.BrainsheetDTO;
 import models.dto.BrainstormingFindingDTO;
+import net.steppschuh.markdowngenerator.MarkdownSerializationException;
 import parsers.BrainsheetDTOBodyParser;
 import parsers.BrainstormingFindingDTOBodyParser;
 import play.libs.Json;
@@ -187,7 +188,7 @@ public class FindingController extends Controller {
     @ApiOperation(
             nickname = "exportBrainstormingFinding",
             value = "export a brainstormingFinding",
-            notes = "With this method you can export the brainstormingFinding",
+            notes = "With this method you can export the brainstormingFinding as markdown",
             httpMethod = "GET",
             response = SuccessMessage.class)
     @ApiResponses(value = {
@@ -199,15 +200,13 @@ public class FindingController extends Controller {
             BrainstormingFinding finding = service.getFinding(findingIdentifier).get();
 
             if (finding != null) {
-                StringBuilder sb = new StringBuilder().append(finding);
-                System.out.println(sb);
-
+                StringBuilder sb = new StringBuilder().append(finding.serialize());
                 return ok(sb.toString());
             } else {
                 return badRequest(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found")));
             }
 
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException | MarkdownSerializationException e) {
             return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
     }

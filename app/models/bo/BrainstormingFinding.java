@@ -1,7 +1,6 @@
 package models.bo;
 
 import net.steppschuh.markdowngenerator.MarkdownCascadable;
-import net.steppschuh.markdowngenerator.MarkdownElement;
 import net.steppschuh.markdowngenerator.MarkdownSerializationException;
 import net.steppschuh.markdowngenerator.text.Text;
 import net.steppschuh.markdowngenerator.text.emphasis.BoldText;
@@ -12,7 +11,7 @@ import org.bson.types.ObjectId;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class BrainstormingFinding extends MarkdownElement implements MarkdownCascadable {
+public class BrainstormingFinding implements MarkdownCascadable {
     private ObjectId id;
     private String identifier;
     private String name;
@@ -162,7 +161,6 @@ public class BrainstormingFinding extends MarkdownElement implements MarkdownCas
     }
 
     @BsonIgnore
-    @Override
     public String serialize() throws MarkdownSerializationException {
 
         if (getName().equals("") || getProblemDescription().equals("") || getNrOfIdeas() == 0 || getType().equals("") || getBrainstormingTeam().equals("")) {

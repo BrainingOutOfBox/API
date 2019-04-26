@@ -2,6 +2,7 @@ package markdown;
 
 import mappers.ModelsMapper;
 import models.bo.BrainstormingFinding;
+import net.steppschuh.markdowngenerator.MarkdownSerializationException;
 import org.junit.Before;
 import org.junit.Test;
 import services.business.FindingService;
@@ -23,11 +24,11 @@ public class MarkdownTest {
     public void markdownTest() {
         try {
             BrainstormingFinding result = service.getFinding("2222").get();
-            StringBuilder sb = new StringBuilder().append(result);
+            StringBuilder sb = new StringBuilder().append(result.serialize());
 
             System.out.println(sb);
 
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException | MarkdownSerializationException e) {
             e.printStackTrace();
         }
     }

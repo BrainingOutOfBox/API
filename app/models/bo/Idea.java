@@ -1,9 +1,10 @@
 package models.bo;
 
 import net.steppschuh.markdowngenerator.MarkdownCascadable;
-import net.steppschuh.markdowngenerator.MarkdownElement;
+import net.steppschuh.markdowngenerator.MarkdownSerializationException;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 
-public abstract class Idea extends MarkdownElement implements MarkdownCascadable {
+public abstract class Idea implements MarkdownCascadable {
     private String description;
 
     public Idea() {
@@ -20,6 +21,11 @@ public abstract class Idea extends MarkdownElement implements MarkdownCascadable
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @BsonIgnore
+    public String serialize() throws MarkdownSerializationException {
+        return "";
     }
 
 }

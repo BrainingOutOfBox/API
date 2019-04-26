@@ -1,14 +1,13 @@
 package models.bo;
 
 import net.steppschuh.markdowngenerator.MarkdownCascadable;
-import net.steppschuh.markdowngenerator.MarkdownElement;
 import net.steppschuh.markdowngenerator.MarkdownSerializationException;
 import net.steppschuh.markdowngenerator.text.heading.Heading;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 
 import java.util.ArrayList;
 
-public final class Brainwave extends MarkdownElement implements MarkdownCascadable {
+public final class Brainwave implements MarkdownCascadable {
     private int nrOfBrainwave;
     ArrayList<Idea> ideas = new ArrayList<>();
 
@@ -54,7 +53,6 @@ public final class Brainwave extends MarkdownElement implements MarkdownCascadab
     }
 
     @BsonIgnore
-    @Override
     public String serialize() throws MarkdownSerializationException {
         if (nrOfBrainwave == -1 || getIdeas() == null) {
             throw new MarkdownSerializationException("nrOfBrainwave is null or ideas");
