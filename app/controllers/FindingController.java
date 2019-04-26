@@ -16,7 +16,6 @@ import play.mvc.Result;
 import services.business.FindingService;
 
 import javax.inject.Inject;
-import java.io.File;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -183,7 +182,7 @@ public class FindingController extends Controller {
             return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
     }
-
+/*
     @ApiOperation(
             nickname = "exportBrainstormingFinding",
             value = "export a brainstormingFinding",
@@ -211,4 +210,5 @@ public class FindingController extends Controller {
             return internalServerError(Json.toJson(new ErrorMessage("Error", e.getMessage())));
         }
     }
+    */
 }
