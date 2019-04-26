@@ -1,8 +1,14 @@
 package models.bo;
 
+import net.steppschuh.markdowngenerator.MarkdownCascadable;
+import net.steppschuh.markdowngenerator.MarkdownElement;
+import net.steppschuh.markdowngenerator.MarkdownSerializationException;
+import net.steppschuh.markdowngenerator.text.heading.Heading;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
+
 import java.util.ArrayList;
 
-public final class Brainsheet {
+public final class Brainsheet extends MarkdownElement implements MarkdownCascadable {
     private int nrOfSheet;
     private ArrayList<Brainwave> brainwaves = new ArrayList<>();
 
@@ -35,4 +41,30 @@ public final class Brainsheet {
         this.brainwaves.add(brainwave);
     }
 
+    @BsonIgnore
+    @Override
+    public String getPredecessor() {
+        return new Heading("Brainsheet ",3).toString();
+    }
+
+    @BsonIgnore
+    @Override
+    public String getSuccessor() {
+        return "\n";
+    }
+
+    @BsonIgnore
+    @Override
+    public String serialize() throws MarkdownSerializationException {
+        if (nrOfSheet == -1 || getBrainwaves() == null) {
+            throw new MarkdownSerializationException("nrOfSheet is null or brainwaves");
+        }
+
+        StringBuilder brainwaves = new StringBuilder();
+
+        for (Brainwave brainwave: getBrainwaves()){
+            brainwaves.append(brainwave.serialize());
+        }
+        return getPredecessor() + getNrOfSheet() + getSuccessor() + brainwaves.toString();
+    }
 }
