@@ -1,6 +1,9 @@
 package models.bo;
 
-public abstract class Idea {
+import net.steppschuh.markdowngenerator.MarkdownCascadable;
+import net.steppschuh.markdowngenerator.MarkdownElement;
+
+public abstract class Idea extends MarkdownElement implements MarkdownCascadable {
     private String description;
 
     public Idea() {
