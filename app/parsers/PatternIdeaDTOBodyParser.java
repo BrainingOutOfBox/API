@@ -21,7 +21,7 @@ public class PatternIdeaDTOBodyParser implements BodyParser<PatternIdeaDTO> {
     private Executor executor;
 
     @Inject
-    public PatternIdeaDTOBodyParser(Json jsonParser, Executor executor) {
+    public PatternIdeaDTOBodyParser(BodyParser.Json jsonParser, Executor executor) {
         this.jsonParser = jsonParser;
         this.executor = executor;
     }
