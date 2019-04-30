@@ -9,7 +9,6 @@ import models.bo.BrainstormingFinding;
 import models.bo.BrainstormingTeam;
 import org.joda.time.DateTime;
 import play.Logger;
-import services.database.DBFindingInterface;
 
 import javax.inject.Inject;
 import java.util.Arrays;
@@ -23,13 +22,11 @@ import static com.mongodb.client.model.Updates.pushEach;
 
 public class MongoDBFindingService implements DBFindingInterface {
 
-    private MongoDBEngineProvider mongoDBProvider;
-    MongoCollection<BrainstormingFinding> findingCollection;
+    private MongoCollection<BrainstormingFinding> findingCollection;
 
     @Inject
     public MongoDBFindingService(MongoDBEngineProvider mongoDBEngineProvider) {
-        this.mongoDBProvider = mongoDBEngineProvider;
-        this.findingCollection = mongoDBProvider.getDatabase().getCollection("BrainstormingFinding", BrainstormingFinding.class);
+        this.findingCollection = mongoDBEngineProvider.getDatabase().getCollection("BrainstormingFinding", BrainstormingFinding.class);
     }
 
 

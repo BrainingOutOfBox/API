@@ -59,6 +59,7 @@ public class TeamServiceTest {
 
             Queue<BrainstormingTeam> result = service.getAllTeamsOfParticipant(moderator).get();
             assertEquals(1, result.size());
+            assertEquals("1111", result.peek().getIdentifier());
 
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();

@@ -4,7 +4,6 @@ import com.mongodb.async.client.MongoCollection;
 import config.MongoDBEngineProvider;
 import models.bo.Participant;
 import play.Logger;
-import services.database.DBParticipantInterface;
 
 import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;
@@ -15,13 +14,11 @@ import static com.mongodb.client.model.Filters.eq;
 
 public class MongoDBParticipantService implements DBParticipantInterface {
 
-    private MongoDBEngineProvider mongoDBProvider;
-    MongoCollection<Participant> participantCollection;
+    private MongoCollection<Participant> participantCollection;
 
     @Inject
     public MongoDBParticipantService(MongoDBEngineProvider mongoDBEngineProvider) {
-        this.mongoDBProvider = mongoDBEngineProvider;
-        this.participantCollection = mongoDBProvider.getDatabase().getCollection("Participant", Participant.class);
+        this.participantCollection = mongoDBEngineProvider.getDatabase().getCollection("Participant", Participant.class);
     }
 
     public CompletableFuture<Participant> getParticipant(String username, String password){
