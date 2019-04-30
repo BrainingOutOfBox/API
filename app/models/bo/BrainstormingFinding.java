@@ -1,11 +1,17 @@
 package models.bo;
 
+import net.steppschuh.markdowngenerator.MarkdownCascadable;
+import net.steppschuh.markdowngenerator.MarkdownSerializationException;
+import net.steppschuh.markdowngenerator.text.Text;
+import net.steppschuh.markdowngenerator.text.emphasis.BoldText;
+import net.steppschuh.markdowngenerator.text.heading.Heading;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class BrainstormingFinding {
+public class BrainstormingFinding implements MarkdownCascadable {
     private ObjectId id;
     private String identifier;
     private String name;
@@ -131,5 +137,42 @@ public class BrainstormingFinding {
 
     public void setBrainstormingTeam(String brainstormingTeam) {
         this.brainstormingTeam = brainstormingTeam;
+    }
+
+    @BsonIgnore
+    @Override
+    public String getPredecessor() {
+        return new Heading(getName(),1).toString() + "\n";
+    }
+
+    @BsonIgnore
+    @Override
+    public String getSuccessor() {
+        StringBuilder successor = new StringBuilder();
+
+        successor.append(new BoldText("Basic Information").toString()).append("\n")
+                .append(new Text("Description: ").toString()).append(getProblemDescription()).append("\n")
+                .append(new Text("Type: ").toString()).append(getType()).append("\n")
+                .append(new Text("Number of Ideas: ").toString()).append(getNrOfIdeas()).append("\n")
+                .append(new Text("Team: ").toString()).append(getBrainstormingTeam()).append("\n\n")
+                .append(new Heading("Sheets", 2).toString()).append("\n");
+
+        return successor.toString();
+    }
+
+    @BsonIgnore
+    public String serialize() throws MarkdownSerializationException {
+
+        if (getName().equals("") || getProblemDescription().equals("") || getNrOfIdeas() == 0 || getType().equals("") || getBrainstormingTeam().equals("")) {
+            throw new MarkdownSerializationException("name is null or description");
+        }
+
+        StringBuilder brainsheets = new StringBuilder();
+
+        for (Brainsheet brainsheet: getBrainsheets()){
+            brainsheets.append(brainsheet.serialize());
+        }
+
+        return getPredecessor() + getSuccessor() + brainsheets.toString();
     }
 }

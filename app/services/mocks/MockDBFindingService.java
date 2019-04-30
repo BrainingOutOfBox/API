@@ -19,9 +19,14 @@ public class MockDBFindingService implements DBFindingInterface {
     public CompletableFuture<BrainstormingFinding> getFinding(String id) {
         CompletableFuture<BrainstormingFinding> future = new CompletableFuture<>();
 
-        ideas.add(new NoteIdea(""));
+        ideas.add(new NoteIdea("Demo Description"));
+        ideas.add(new SketchIdea("Demo Sketch", "5cacac634b0a388f2de8418f"));
+        ideas.add(new PatternIdea("API Key","How can an API provider identify and authenticate different clients (that make requests)?", "As an API provider, assign each client a unique token – the API Key – that the client can present to the API endpoint for identification purposes.", "https://microservice-api-patterns.org/patterns/quality/qualityManagementAndGovernance/APIKey", "software", "5cc16f231c2cb6761529cd6c"));
+
         brainwaves.add(new Brainwave(0, this.ideas));
+        brainwaves.add(new Brainwave(1, this.ideas));
         brainsheets.add(new Brainsheet(0, this.brainwaves));
+
         finding = new BrainstormingFinding("TestFinding", "Test", 2, 3, 0, "", "software", brainsheets, 0, "1111");
         finding.setIdentifier("2222");
 

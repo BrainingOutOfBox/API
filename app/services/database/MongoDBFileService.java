@@ -41,7 +41,7 @@ public class MongoDBFileService implements DBFileInterface {
     }
 
     @Override
-    public byte[] downloadFileAsStream(String id) throws ExecutionException, InterruptedException {
+    public byte[] downloadFileAsStream(String id) throws ExecutionException, InterruptedException, IllegalArgumentException {
         ObjectId fileId = new ObjectId(id);
         final ByteBuffer dstByteBuffer = ByteBuffer.allocate(1024 * 1024);
         final GridFSDownloadStream downloadStream = gridFSBucket.openDownloadStream(fileId);
