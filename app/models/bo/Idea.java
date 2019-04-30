@@ -5,7 +5,7 @@ import net.steppschuh.markdowngenerator.MarkdownSerializationException;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 
 public abstract class Idea implements MarkdownCascadable {
-    private String description;
+    private String description = "";
 
     public Idea() {
 

@@ -15,7 +15,7 @@ public class BrainstormingFinding implements MarkdownCascadable {
     private ObjectId id;
     private String identifier;
     private String name;
-    private String problemDescription;
+    private String problemDescription = "";
     private int nrOfIdeas;
     private int baseRoundTime;
     private int currentRound;
@@ -163,7 +163,7 @@ public class BrainstormingFinding implements MarkdownCascadable {
     @BsonIgnore
     public String serialize() throws MarkdownSerializationException {
 
-        if (getName().equals("") || getProblemDescription().equals("") || getNrOfIdeas() == 0 || getType().equals("") || getBrainstormingTeam().equals("")) {
+        if (getName().equals("") || getNrOfIdeas() == 0 || getType().equals("") || getBrainstormingTeam().equals("")) {
             throw new MarkdownSerializationException("name is null or description");
         }
 
