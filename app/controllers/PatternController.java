@@ -1,5 +1,7 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -18,7 +20,7 @@ import play.mvc.Result;
 import services.business.PatternService;
 
 import javax.inject.Inject;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -42,13 +44,15 @@ public class PatternController extends Controller {
             @ApiResponse(code = 500, message = "Internal Server ErrorMessage", response = ErrorMessage.class) })
     public Result getAllPatternIdeas(){
         CompletableFuture<Queue<PatternIdea>> future = service.getAllPatternIdeas();
-        Queue<PatternIdeaDTO> list = new LinkedList<>();
+        ArrayList<JsonNode> list = new ArrayList<>();
 
         try {
 
             for (PatternIdea patternIdea : future.get()) {
                 PatternIdeaDTO patternIdeaDTO = modelsMapper.toPatternIdeaDTO(patternIdea);
-                list.add(patternIdeaDTO);
+                JsonNode node = Json.toJson(patternIdeaDTO);
+                ((ObjectNode)node).put("type", "patternIdea");
+                list.add(node);
             }
 
             return ok(Json.toJson(list));
