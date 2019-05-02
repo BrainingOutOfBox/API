@@ -15,7 +15,7 @@ public class ModelsMapper {
         modelMapper.createTypeMap(Idea.class, IdeaDTO.class)
                 .include(NoteIdea.class, IdeaDTO.class)
                 .include(SketchIdea.class, IdeaDTO.class)
-                .include(PatternIdea.class, PatternIdeaDTO.class);
+                .include(PatternIdea.class, IdeaDTO.class);
 
         modelMapper.typeMap(NoteIdea.class, IdeaDTO.class).setProvider(request -> {
             NoteIdea idea = (NoteIdea)request.getSource();
