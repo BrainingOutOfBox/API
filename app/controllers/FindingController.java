@@ -197,13 +197,12 @@ public class FindingController extends Controller {
     public Result exportBrainstorming(String findingIdentifier){
         try {
 
-            BrainstormingFinding finding = service.getFinding(findingIdentifier).get();
+            String result = service.exportBrainstorming(findingIdentifier);
 
-            if (finding != null) {
-                StringBuilder sb = new StringBuilder().append(finding.serialize());
-                return ok(sb.toString());
+            if (result != null) {
+                return ok(result);
             } else {
-                return badRequest(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding found")));
+                return badRequest(Json.toJson(new ErrorMessage("Error", "No brainstormingFinding with given ID found")));
             }
 
         } catch (InterruptedException | ExecutionException | MarkdownSerializationException e) {

@@ -3,6 +3,7 @@ package services.business;
 import mappers.ModelsMapper;
 import models.bo.*;
 import models.dto.BrainstormingFindingDTO;
+import net.steppschuh.markdowngenerator.MarkdownSerializationException;
 import org.joda.time.DateTime;
 import services.database.DBFindingInterface;
 import services.database.DBTeamInterface;
@@ -62,6 +63,18 @@ public class FindingService {
             return false;
         }
 
+    }
+
+    public String exportBrainstorming(String findingIdentifier) throws ExecutionException, InterruptedException, MarkdownSerializationException {
+        BrainstormingFinding finding = service.getFinding(findingIdentifier).get();
+
+        if (finding != null) {
+            BrainstormingTeam team = teamService.getTeam(finding.getBrainstormingTeam()).get();
+            finding.setBrainstormingTeam(team.getName());
+            return finding.serialize();
+        }
+        
+        return null;
     }
 
     public boolean startBrainstorming(String findingIdentifier) throws ExecutionException, InterruptedException {
