@@ -27,6 +27,14 @@ There are several controllers in this project.
 - TeamController.java:
 
   Handles all requests for BrainstormingTeams.
+  
+- FileController.java:
+
+  Handles all requests for Files.
+  
+- PatternController.java:
+
+  Handles all requests for PatternIdeas.
 
 ## Components
 
@@ -42,6 +50,14 @@ There are several controllers in this project.
 
   Contains all business logic for the correct processing of the BrainstormingTeams.
   
+- FileService.java:
+
+  Contains all business logic for the correct processing of files.
+  
+- PatternService.java:
+
+  Contains all business logic for the correct processing of the PatternIdeas.
+  
   
 - MongoDBFindingService
   
@@ -55,6 +71,14 @@ There are several controllers in this project.
 
   Enables connection to the mongodb database for BrainstormingTeams.
 
+- MongoDBFileService
+
+  Enables connection to the mongodb database for Files.
+  
+- MongoDBPatternService
+
+  Enables connection to the mongodb database for PatternIdeas.
+
 ## Parsers
 The different parsers exptect JSON and generate the appropriate DTO from it.
 
@@ -62,6 +86,8 @@ The different parsers exptect JSON and generate the appropriate DTO from it.
 - BrainsheetDTOBodyParser.java
 - BrainstormingTeamDTOBodyParser.java
 - ParticipantDTOBodyParser.java
+- MultipartFormDataBodyParser.java
+- PatternIdeaDTOBodyParser.java
 
 
 ## Filters
