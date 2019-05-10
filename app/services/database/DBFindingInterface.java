@@ -17,7 +17,7 @@ public interface DBFindingInterface {
 
     void insertFinding(BrainstormingFinding finding);
 
-    void exchangeBrainsheet(BrainstormingFinding finding, Brainsheet oldBrainsheet, Brainsheet newBrainsheet);
+    void exchangeBrainsheet(BrainstormingFinding finding, Brainsheet newBrainsheet);
 
     void nextRound(BrainstormingFinding finding);
 

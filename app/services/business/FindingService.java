@@ -56,8 +56,7 @@ public class FindingService {
             return false;
         } else {
             if (newBrainsheet.getNrOfSheet() < finding.getBrainsheets().size()) {
-                Brainsheet oldBrainsheet = finding.getBrainsheets().get(newBrainsheet.getNrOfSheet());
-                service.exchangeBrainsheet(finding, oldBrainsheet, newBrainsheet);
+                service.exchangeBrainsheet(finding, newBrainsheet);
                 return true;
             }
             return false;

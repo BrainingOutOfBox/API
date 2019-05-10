@@ -58,11 +58,9 @@ public class MongoDBFindingService implements DBFindingInterface {
         return future;
     }
 
-    public void exchangeBrainsheet(BrainstormingFinding finding, Brainsheet oldBrainsheet, Brainsheet newBrainsheet){
-        //delete old Brainsheet
-        findingCollection.updateOne(eq("identifier", finding.getIdentifier()),pullByFilter(Filters.eq("brainsheets", oldBrainsheet)), (result, t) -> Logger.info(result.getModifiedCount() + " old Brainsheet successfully deleted"));
-        //insert new Brainsheet at the same place
-        findingCollection.updateOne(eq("identifier", finding.getIdentifier()),combine(pushEach("brainsheets", Arrays.asList(newBrainsheet), new PushOptions().position(newBrainsheet.getNrOfSheet())), inc("deliveredBrainsheetsInCurrentRound", 1)), (result, t) -> Logger.info(result.getModifiedCount() + " new Brainsheet successfully inserted"));
+    public void exchangeBrainsheet(BrainstormingFinding finding, Brainsheet newBrainsheet){
+        //update Brainsheet at the correct index
+        findingCollection.updateOne(eq("identifier", finding.getIdentifier()),combine(set("brainsheets."+newBrainsheet.getNrOfSheet(), newBrainsheet), inc("deliveredBrainsheetsInCurrentRound", 1)), (result, t) -> Logger.info(result.getModifiedCount() + " new Brainsheet successfully updated"));
     }
 
     public void nextRound(BrainstormingFinding finding){
