@@ -62,7 +62,7 @@ public class MockDBFindingService implements DBFindingInterface {
     }
 
     @Override
-    public void exchangeBrainsheet(BrainstormingFinding finding, Brainsheet oldBrainsheet, Brainsheet newBrainsheet) {
+    public void exchangeBrainsheet(BrainstormingFinding finding, Brainsheet newBrainsheet) {
 
     }
 
